@@ -1,14 +1,20 @@
 package iisc.pods.cab_service;
 
+import java.util.ArrayList;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class Controller {
+    @Autowired
+    private CabDataService dataService;
+
     @RequestMapping("/")
-    public String home() {
-        return "Hello";
+    public ArrayList<Cab> home() {
+        return dataService.getAllCabs();
     }
 
     @RequestMapping("/requestRide")
