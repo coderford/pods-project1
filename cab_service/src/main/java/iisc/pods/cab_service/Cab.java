@@ -6,8 +6,11 @@ public class Cab {
     private CabState state;
 
     private boolean signedIn;
+    private boolean interested;
     private int rideId;
     private int location;
+    private int sourceLoc;
+    private int destinationLoc;
 
     public Cab() {
 
@@ -20,6 +23,9 @@ public class Cab {
         this.rideId = -1;
         this.location = 0;
         this.signedIn = false;
+        this.interested = true;
+        this.sourceLoc = -1;
+        this.destinationLoc = -1;
     }
 
     public int getId() {
@@ -47,21 +53,28 @@ public class Cab {
     }
 
     public boolean isInterested() {
-        if(numRides%2 == 0)
-            return true;
-        return false;
+        return interested;
     }
 
-    public boolean requestRide(int rideId) {
-        if(signedIn && isInterested() && state == CabState.AVAILABLE) {
+    public boolean requestRide(int rideId, int sourceLoc, int destinationLoc) {
+        if(signedIn && state == CabState.AVAILABLE) {
+            if(interested) {
+                interested = false;
+            } else {
+                interested = true;
+                return false;
+            }
+
             this.rideId = rideId;
             this.state = CabState.COMMITTED;
+            this.sourceLoc = sourceLoc;
+            this.destinationLoc = destinationLoc;
             return true;
         }
         return false;
     }
 
-    public boolean rideStarted() {
+    public boolean rideStarted(int rideId) {
         if(state != CabState.COMMITTED) return false;
 
         state = CabState.GIVING_RIDE;
@@ -73,6 +86,8 @@ public class Cab {
             return false;
         this.state = CabState.AVAILABLE;
         this.rideId = -1;
+        this.sourceLoc = -1;
+        this.destinationLoc = -1;
         return true;
     }
 
@@ -81,6 +96,9 @@ public class Cab {
             return false;
         this.state = CabState.AVAILABLE;
         this.rideId = -1;
+        this.location = this.destinationLoc;
+        this.sourceLoc = -1;
+        this.destinationLoc = -1;
         numRides++;
         return true;
     }

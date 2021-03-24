@@ -24,36 +24,64 @@ public class Controller {
         @RequestParam int sourceLoc,
         @RequestParam int destinationLoc
     ) {
-        return true;
+        Cab cab;
+        try { cab = dataService.getCabWithId(cabId); }
+        catch(Exception e) { return false; }
+
+        return cab.requestRide(rideId, sourceLoc, destinationLoc);
     }
 
     @RequestMapping("/rideStarted")
     public boolean rideStarted(@RequestParam int cabId, @RequestParam int rideId) {
-        return true;
+        Cab cab;
+        try { cab = dataService.getCabWithId(cabId); }
+        catch(Exception e) { return false; }
+
+        return cab.rideStarted(rideId);
     }
 
     @RequestMapping("/rideCanceled")
     public boolean rideCanceled(@RequestParam int cabId, @RequestParam int rideId) {
-        return true;
+        Cab cab;
+        try { cab = dataService.getCabWithId(cabId); }
+        catch(Exception e) { return false; }
+
+        return cab.rideCanceled(rideId);
     }
 
     @RequestMapping("/rideEnded")
     public boolean rideEnded(@RequestParam int cabId, @RequestParam int rideId) {
-        return true;
+        Cab cab;
+        try { cab = dataService.getCabWithId(cabId); }
+        catch(Exception e) { return false; }
+
+        return cab.rideEnded(rideId);
     }
 
     @RequestMapping("/signIn")
     public boolean signIn(@RequestParam int cabId, @RequestParam int initialPos) {
-        return true;
+        Cab cab;
+        try { cab = dataService.getCabWithId(cabId); }
+        catch(Exception e) { return false; }
+
+        return cab.signIn(initialPos);
     }
 
     @RequestMapping("/signOut")
     public boolean signOut(@RequestParam int cabId) {
-        return true;
+        Cab cab;
+        try { cab = dataService.getCabWithId(cabId); }
+        catch(Exception e) { return false; }
+
+        return cab.signOut();
     }
 
     @RequestMapping("/numRides")
-    public boolean numRides(@RequestParam int cabId) {
-        return true;
+    public int numRides(@RequestParam int cabId) {
+        Cab cab;
+        try { cab = dataService.getCabWithId(cabId); }
+        catch(Exception e) { return -1; }
+
+        return cab.getNumRides();
     }
 }
