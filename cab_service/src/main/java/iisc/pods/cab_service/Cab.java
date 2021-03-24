@@ -1,5 +1,12 @@
 package iisc.pods.cab_service;
 
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
+import java.util.Scanner;
+
 public class Cab {
     private int id;
     private int numRides;
@@ -124,10 +131,71 @@ public class Cab {
     }
 
     public boolean sendSignInRequest(int id, int initialPos) {
+        // Reference: https://stackoverflow.com/a/2793153
+        String signInURL = "http://localhost:8081/cabSignsIn";
+        String charset = "UTF-8";
+        String paramCabId = String.format("%d", id);
+        String paramInitialPos = String.format("%d", initialPos);
+
+        String query;
+        try {
+            query =  String.format("cabId=%s&initalPos=%s",
+                URLEncoder.encode(paramCabId, charset),
+                URLEncoder.encode(paramInitialPos, charset)
+            );
+        } catch (UnsupportedEncodingException e) {
+            System.out.println("ERROR: Unsupported encoding format!");
+            return false;
+        };
+
+        URLConnection connection;
+        try {
+            connection = new URL(signInURL + "?" + query).openConnection();
+            connection.setRequestProperty("Accept-Charset", charset);
+            InputStream response = connection.getInputStream();
+            Scanner scanner = new Scanner(response);
+            String responseBody = scanner.useDelimiter("\\A").next();
+            scanner.close();
+
+            if(responseBody == "false") return false;
+        } catch (Exception e) {
+            System.out.println("ERROR: Some error occured while trying to send sign-in request to ride service!");
+            return false;
+        }
+
         return true;
     }
     
     public boolean sendSignOutRequest(int id) {
+        String signOutURL = "http://localhost:8081/cabSignsOut";
+        String charset = "UTF-8";
+        String paramCabId = String.format("%d", id);
+
+        String query;
+        try {
+            query =  String.format("cabId=%s",
+                URLEncoder.encode(paramCabId, charset)
+            );
+        } catch (UnsupportedEncodingException e) {
+            System.out.println("ERROR: Unsupported encoding format!");
+            return false;
+        };
+
+        URLConnection connection;
+        try {
+            connection = new URL(signOutURL + "?" + query).openConnection();
+            connection.setRequestProperty("Accept-Charset", charset);
+            InputStream response = connection.getInputStream();
+            Scanner scanner = new Scanner(response);
+            String responseBody = scanner.useDelimiter("\\A").next();
+            scanner.close();
+
+            if(responseBody == "false") return false;
+        } catch (Exception e) {
+            System.out.println("ERROR: Some error occured while trying to send sign-out request to ride service!");
+            return false;
+        }
+
         return true;
     }
 }
