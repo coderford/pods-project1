@@ -1,13 +1,13 @@
 package iisc.pods.wallet_service;
 
-public class Customer {
+public class Wallet {
     private int id;
     private int balance;
 
-    public Customer() {
+    public Wallet() {
     }
 
-    public Customer(int id, int initBalance) {
+    public Wallet(int id, int initBalance) {
         this.id = id;
         this.balance = initBalance;
     }
