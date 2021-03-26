@@ -19,21 +19,36 @@ public class Controller {
 
     @RequestMapping("/getBalance")
     public int getBalance(@RequestParam int custId) {
-        return 0;
+        try {
+            Wallet w = dataService.getWalletWithCustId(custId);
+            return w.getBalance();
+        } catch(Exception e) {
+            return -1;
+        }
     }
 
     @RequestMapping("/deductAmount")
     public boolean deductAmount(@RequestParam int custId, @RequestParam int amount) {
-        return true;
+        try {
+            Wallet w = dataService.getWalletWithCustId(custId);
+            return w.deductAmount(amount);
+        } catch(Exception e) {
+            return false;
+        }
     }
 
     @RequestMapping("/addAmount")
     public boolean addAmount(@RequestParam int custId, @RequestParam int amount) {
-        return true;
+        try {
+            Wallet w = dataService.getWalletWithCustId(custId);
+            return w.addAmount(amount);
+        } catch(Exception e) {
+            return false;
+        }
     }
 
+    @RequestMapping("/reset")
     public void reset() {
-
+        dataService.resetAllWallets();
     }
-    
 }

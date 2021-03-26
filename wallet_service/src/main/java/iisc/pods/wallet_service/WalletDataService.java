@@ -19,7 +19,13 @@ public class WalletDataService {
         return wallets;
     }
 
-    public Wallet getWalletWithId(int id) {
-        return wallets.stream().filter(w -> (w.getId() == id)).findFirst().get();
+    public Wallet getWalletWithCustId(int custId) {
+        return wallets.stream().filter(w -> (w.getCustId() == custId)).findFirst().get();
+    }
+
+    public void resetAllWallets() {
+        for(Wallet w : wallets) {
+            w.resetBalance();
+        }
     }
 }

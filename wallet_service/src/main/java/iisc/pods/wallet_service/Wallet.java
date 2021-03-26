@@ -1,19 +1,21 @@
 package iisc.pods.wallet_service;
 
 public class Wallet {
-    private int id;
+    private int custId;
+    private int initBalance;
     private int balance;
 
     public Wallet() {
     }
 
-    public Wallet(int id, int initBalance) {
-        this.id = id;
+    public Wallet(int custId, int initBalance) {
+        this.custId = custId;
+        this.initBalance = initBalance;
         this.balance = initBalance;
     }
 
-    public int getId() {
-        return id;
+    public int getCustId() {
+        return custId;
     }
 
     public int getBalance() {
@@ -29,14 +31,14 @@ public class Wallet {
     }
 
     public boolean deductAmount(int amount) {
-        if(amount <= balance) {
+        if(amount > 0 && amount <= balance) {
             balance -= amount;
             return true;
         }
         return false;
     }
 
-    public void setBalance(int balance) {
-        this.balance = balance;
+    public void resetBalance() {
+        balance = initBalance;
     }
 }
