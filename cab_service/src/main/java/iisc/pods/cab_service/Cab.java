@@ -99,12 +99,43 @@ public class Cab {
     public boolean rideEnded(int rideId) {
         if(this.state != CabState.GIVING_RIDE || this.rideId != rideId)
             return false;
+
+        String rideEndedURL = "http://localhost:8081/rideEnded";
+        String charset = "UTF-8";
+        String paramRideId = String.format("%d", this.rideId);
+
+        String query;
+        try {
+            query =  String.format("rideId=%s",
+                URLEncoder.encode(paramRideId, charset)
+            );
+        } catch (UnsupportedEncodingException e) {
+            System.out.println("ERROR: Unsupported encoding format!");
+            return false;
+        };
+
+        URLConnection connection;
+        try {
+            connection = new URL(rideEndedURL + "?" + query).openConnection();
+            connection.setRequestProperty("Accept-Charset", charset);
+            InputStream response = connection.getInputStream();
+            Scanner scanner = new Scanner(response);
+            String responseBody = scanner.useDelimiter("\\A").next();
+            scanner.close();
+
+            if(responseBody == "false") return false;
+        } catch (Exception e) {
+            System.out.println("ERROR: Some error occured while trying to send sign-out request to ride service!");
+            return false;
+        }
+
         this.state = CabState.AVAILABLE;
         this.rideId = -1;
         this.location = this.destinationLoc;
         this.sourceLoc = -1;
         this.destinationLoc = -1;
         numRides++;
+
         return true;
     }
 
