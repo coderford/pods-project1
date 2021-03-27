@@ -167,7 +167,7 @@ public class Cab {
 
         String query;
         try {
-            query =  String.format("cabId=%s&initalPos=%s",
+            query =  String.format("cabId=%s&initialPos=%s",
                 URLEncoder.encode(paramCabId, charset),
                 URLEncoder.encode(paramInitialPos, charset)
             );
