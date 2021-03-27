@@ -10,7 +10,7 @@ curl -s http://localhost:8082/reset
 testPassed="yes"
 
 #cab 101 signs in
-resp=$(curl -s “http://localhost:8080/signIn?cabId=101&initialPos=0”)
+resp=$(curl -s "http://localhost:8080/signIn?cabId=101&initialPos=0")
 if [ "$resp" = "true" ];
 then
     echo "Cab 101 signed in"
@@ -20,7 +20,7 @@ else
 fi
 
 #customer 201 requests a ride
-rideId=$(curl -s “http://localhost:8081/requestRide?custId=201&sourceLoc=2&destinationLoc=10”)
+rideId=$(curl -s "http://localhost:8081/requestRide?custId=201&sourceLoc=2&destinationLoc=10")
 if [ "$rideId" != "-1" ];
 then
     echo "Ride by customer 201 started"
@@ -30,7 +30,7 @@ else
 fi
 
 #customer 202 requests a ride
-rideId=$(curl -s “http://localhost:8081/requestRide?custId=202&sourceLoc=1&destinationLoc=11”)
+rideId=$(curl -s "http://localhost:8081/requestRide?custId=202&sourceLoc=1&destinationLoc=11")
 if [ "$rideId" != "-1" ];
 then
     echo "Ride by customer 202 started"
