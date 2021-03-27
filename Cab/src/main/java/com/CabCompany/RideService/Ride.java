@@ -25,7 +25,7 @@ public class Ride {
     private int destLoc;
     private int fare;
     private boolean signedIn;
-
+/*
     public Ride(int custId,int sourcLoc,int destLoc)
     {
         this.custId=custId;
@@ -39,7 +39,7 @@ public class Ride {
         this.fare=0;
         this.signedIn=false;
     }
-
+*/
 
     public boolean requestRide(int custId,int sourcLoc,int destLoc)
     {
@@ -48,9 +48,13 @@ public class Ride {
         //cab selection mechanism
         int i=0;
         CabDataService obj=new CabDataService();
-
+        CustDataService customerObj=new CustDataService();
+        ArrayList<Customer> customers=customerObj.getAllCustomers();
         ArrayList<Cab> cabs=obj.getAllCabs();
+        Customer custData=customerObj.getCustId(custId);
         Cab data=cabs.get(i);
+
+        
         while(data!=null || requestcount!=3)
     {
         
@@ -174,14 +178,48 @@ public class Ride {
         }
             return false;
         }
+
+        //sending cabService.rideStarted 
+
+        String rideStartedURL = "http://localhost:8080/rideCanceled";
+        //String charset = "UTF-8";
+         paramCabId = String.format("%d", cabId); 
+        paramrideId=String.format("%d", rideId);
+        try {
+            query =  String.format("cabId=%s&riedId=%s",
+                URLEncoder.encode(paramCabId, charset),
+                URLEncoder.encode(paramrideId, charset)
+                
+            );
+        } catch (UnsupportedEncodingException e) {
+            System.out.println("ERROR: Unsupported encoding format!");
+            return false;
+        }
+
+      //  URLConnection connection;
+       // String cabReqResponse;
+        try {
+            connection = new URL(rideStartedURL + "?" + query).openConnection();
+            connection.setRequestProperty("Accept-Charset", charset);
+           // InputStream response = connection.getInputStream();
+           // Scanner scanner = new Scanner(response);
+           // cabReqResponse = scanner.useDelimiter("\\A").next();
+           // scanner.close();
+            
+        } catch (Exception e) {
+            System.out.println("ERROR: Some error occured while trying to send ride started request to cab service!");
+            return false;
+        }
         
-        //update methods in cab
+        //update values of cab
         data.setRideId(rideId);
         data.setState(Cabstate.GIVING_RIDE);
         data.setsourceLoc(sourcLoc);
         data.setDestLoc(destLoc);
         data.setNumRide();
-        
+        //changing values of customer
+        custData.setRideId(rideId);
+        custData.setState(Ridestate.STARTED);
 
         return true;
 
@@ -197,15 +235,19 @@ public class Ride {
     
 }
 
-    public boolean cabSignIn(int cabId, int initialPos)
+    public boolean cabSignsIn(int cabId, int Pos)
     {
-        if(cabstate==Cabstate.AVAILABLE && IsValidCabId(cabId))
+     
+        CabDataService obj=new CabDataService();
+        Cab data=obj.getCabId(cabId);
+
+        if(data.state==Cabstate.SIGNEDOUT && IsValidCabId(cabId))
         {
-            this.signedIn=true;
-            this.cabId=cabId;
-            this.Pos=initialPos;
+            data.setState(Cabstate.AVAILABLE);
+            data.initialPos=Pos;
             return true;
         }
+        System.out.println("Cab Already Signed In");
         return false;
     }
 
@@ -236,7 +278,8 @@ public class Ride {
     public boolean IsValidCabId(int cabId) // to be implemented 
     {
         CabDataService obj=new CabDataService();
-        if(obj.getCabWithId(cabId)!=0){
+    
+        if(obj.getCabId(cabId)!=null){
             return true;
         }
        return false;

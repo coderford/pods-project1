@@ -1,4 +1,4 @@
-package com.CabCompany.Cab;
+package com.CabCompany.RideService;
 
 public enum Ridestate {
 STARTED,

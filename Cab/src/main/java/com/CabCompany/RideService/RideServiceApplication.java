@@ -1,4 +1,4 @@
-package com.CabCompany.Cab;
+package com.CabCompany.RideService;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -10,7 +10,13 @@ public class RideServiceApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(RideServiceApplication.class, args);
-		System.out.println("Hello people ...");
+		//System.out.println("Hello people ...");
+
+		CabDataService cabobject=new CabDataService();
+		cabobject.Displaycabs();
+		CustDataService custobject=new CustDataService();
+		custobject.Displaycabs();
+
 	}
 
 }
