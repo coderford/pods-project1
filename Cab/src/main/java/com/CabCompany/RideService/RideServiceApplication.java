@@ -15,7 +15,13 @@ public class RideServiceApplication {
 		CabDataService cabobject=new CabDataService();
 		cabobject.Displaycabs();
 		CustDataService custobject=new CustDataService();
-		custobject.Displaycabs();
+		custobject.Displaycustomers();
+
+		Cab data=cabobject.getAllCabs().get(1);
+		
+		data.setRideId(1996);
+		cabobject.Displaycabs();
+
 
 	}
 

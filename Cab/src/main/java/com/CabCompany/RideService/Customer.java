@@ -3,9 +3,9 @@ package com.CabCompany.RideService;
 public class Customer
 {
     int custId;
-    private int sourcLoc;
-    private int rideId;
-    private Ridestate state;
+    int sourcLoc;
+    int rideId;
+    Ridestate state;
 
     public Customer(int custId)
     {
@@ -15,15 +15,26 @@ public class Customer
         this.state=Ridestate.ENDED;
     }
 
+    public int getCustId()
+    {
+        return custId;
+    }
+
+    public int getCustLoc()
+    {
+        return sourcLoc;
+    }
+    public int getRideId()
+    {
+        return rideId;
+    }
+
     public Ridestate getcustState()
     {
         return state;
     }
 
-    public int getRideId()
-    {
-        return rideId;
-    }
+   
 
     public void setRideId(int rideId2) {
         this.rideId=rideId2;

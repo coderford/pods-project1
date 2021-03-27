@@ -2,15 +2,16 @@ package com.CabCompany.RideService;
 
 public class Cab {
     int cabId;
-    private int numRides;
+    int numRides;
     Cabstate state;
 
     private boolean signedIn;
    // private boolean interested;
-    private int rideId;
+    int rideId;
     int initialPos;
-    private int sourceLoc;
-    private int destinationLoc;
+    Ridestate ridestate;
+    int sourceLoc;
+    int destinationLoc;
 
     public Cab() {
 
@@ -32,20 +33,19 @@ public class Cab {
         return cabId;
     }
 
-    public Cabstate getState() {
-        return state;
+    public int getRideId() {
+        return rideId;
     }
-
     public int getNumRides() {
         return numRides;
     }
 
-    public int getLocation() {
-        return initialPos;
+    public Cabstate getState() {
+        return state;
     }
 
-    public int getRideId() {
-        return rideId;
+    public int getLocation() {
+        return initialPos;
     }
 
     public boolean isSignedIn() {
@@ -70,6 +70,10 @@ public class Cab {
 
     public void setNumRide() {
         this.numRides+=1;
+    }
+
+    public void setRidestate(Ridestate state) {
+        this.ridestate=state;
     }
 
 }

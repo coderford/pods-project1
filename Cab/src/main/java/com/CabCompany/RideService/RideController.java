@@ -31,18 +31,16 @@ public class RideController {
             return null;
 
         }
-       // custobject.Displaycabs();
-
-       // CabDataService cabobject =new CabDataService();
             
     }
+
 
     @Autowired
     private CustDataService custobject;
     @RequestMapping("/customers")
     public ArrayList<Customer> Displaycustomers()
     {
-        ArrayList<Customer> customers=custobject.getAllCustomers();
+       // ArrayList<Customer> customers=custobject.getAllCustomers();
         try{
 
             return custobject.getAllCustomers();
@@ -56,40 +54,57 @@ public class RideController {
 
     @RequestMapping("/rideEnded")
     public boolean rideEnded(@RequestParam int cabId, @RequestParam int rideId) {
+        Cab data=cabobject.getCabId(cabId);
+        data.setState(Cabstate.AVAILABLE);
+
         return true;
     }
 
     @RequestMapping("/signsIn")
     public boolean cabSignsIn(@RequestParam int cabId, @RequestParam int initialPos) {
-        return true;
+        try{
+          Cab  data=cabobject.getCabId(cabId);
+          data.initialPos=initialPos;
+          data.setState(Cabstate.AVAILABLE);
+            return true;
+            
+        }catch(Exception e){
+            return false;
+
+        }
     }
 
     @RequestMapping("/signsOut")
     public boolean cabsignsOut(@RequestParam int cabId) {
+        Cab data=cabobject.getCabId(cabId);
+        data.setState(Cabstate.SIGNEDOUT);
         return true;
     }
 
     @RequestMapping("/requestRide")
     public  int  requestRide(@RequestParam int custId,@RequestParam int sourceLoc,@RequestParam int  destinationLoc)
     {
-
-         return -1;
+        Ride riderequest=new Ride(); 
+        return riderequest.requestRide(custId, sourceLoc, destinationLoc);
     }
 
     @RequestMapping("/getcabstatus")
     public String getCabStatus(@RequestParam int cabId)
     {
-        return "-1";
+        Ride status=new Ride(); 
+        return status.getCabStatus(cabId);
+        
+     //   return "-1";
     }
 
     @RequestMapping("/reset")
     public void reset()
     {
         
-        CabDataService cabobject =new CabDataService();
+       // CabDataService cabobject =new CabDataService();
         cabobject.reset();
 
-        CustDataService custobject=new  CustDataService();
+       // CustDataService custobject=new  CustDataService();
         custobject.reset();
     }
 
