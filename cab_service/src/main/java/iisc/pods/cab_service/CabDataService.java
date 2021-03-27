@@ -4,8 +4,10 @@
 */
 package iisc.pods.cab_service;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Scanner;
 
 import org.springframework.stereotype.Service;
 
@@ -14,9 +16,33 @@ public class CabDataService {
     private ArrayList<Cab> cabs;
 
     public CabDataService() {
-        cabs = new ArrayList<>(Arrays.asList(
-            new Cab(1), new Cab(2), new Cab(3), new Cab(4)
-        ));
+        cabs = new ArrayList<>();
+        ArrayList<Integer> ids = new ArrayList<>();
+
+        try {
+            File inputFile = new File("input.txt");
+            Scanner in = new Scanner(inputFile);
+
+            int section = 0;
+            while(in.hasNextLine()) {
+                String line = in.nextLine();
+                if(line.compareTo("****") == 0) {
+                    section++;
+                }
+                else if(section == 1) {
+                    ids.add(Integer.parseInt(line));
+                }
+            }
+
+            in.close();
+        }
+        catch(Exception e) {
+            System.out.println("ERROR: Could not read input file!");
+        }
+
+        for(int id : ids) {
+            cabs.add(new Cab(id));
+        }
     }
 
     public ArrayList<Cab> getAllCabs() {
