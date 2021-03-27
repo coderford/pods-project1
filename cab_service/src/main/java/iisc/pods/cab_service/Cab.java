@@ -12,7 +12,6 @@ public class Cab {
     private int numRides;
     private CabState state;
 
-    private boolean signedIn;
     private boolean interested;
     private int rideId;
     private int location;
@@ -26,10 +25,9 @@ public class Cab {
     public Cab(int id) {
         this.id = id;
         this.numRides = 0;
-        this.state = CabState.AVAILABLE;
+        this.state = CabState.SIGNED_OUT;
         this.rideId = -1;
         this.location = 0;
-        this.signedIn = false;
         this.interested = true;
         this.sourceLoc = -1;
         this.destinationLoc = -1;
@@ -56,7 +54,7 @@ public class Cab {
     }
 
     public boolean isSignedIn() {
-        return signedIn;
+        return (state != CabState.SIGNED_OUT);
     }
 
     public boolean isInterested() {
@@ -64,7 +62,7 @@ public class Cab {
     }
 
     public boolean requestRide(int rideId, int sourceLoc, int destinationLoc) {
-        if(signedIn && state == CabState.AVAILABLE) {
+        if(state == CabState.AVAILABLE) {
             if(interested) {
                 interested = false;
             } else {
@@ -111,9 +109,9 @@ public class Cab {
     }
 
     public boolean signIn(int initialPos) {
-        boolean signInAllowed = (!signedIn && sendSignInRequest(id, initialPos));
+        boolean signInAllowed = (state == CabState.SIGNED_OUT && sendSignInRequest(id, initialPos));
         if(signInAllowed) {
-            signedIn = true;
+            state = CabState.AVAILABLE;
             location = initialPos;
             return true;
         }
@@ -121,10 +119,9 @@ public class Cab {
     }
 
     public boolean signOut() {
-        boolean signOutAllowed = (signedIn && sendSignOutRequest(id));
+        boolean signOutAllowed = (state != CabState.SIGNED_OUT && sendSignOutRequest(id));
         if(signOutAllowed) {
-            signedIn = false;
-            state = CabState.AVAILABLE;
+            state = CabState.SIGNED_OUT;
             return true;
         }
         return false;
