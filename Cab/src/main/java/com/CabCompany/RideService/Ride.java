@@ -29,8 +29,8 @@ public class Ride {
     public Ride(int custId,int sourcLoc,int destLoc)
     {
         this.custId=custId;
-        this.cabId=-1;
-        this.rideId=-1;
+        this.cabId=false;
+        this.rideId=false;
         this.cabstate=cabstate.AVAILABLE;
         this.ridestate=ridestate.ENDED;
         this.Pos=0;
@@ -41,7 +41,7 @@ public class Ride {
     }
 */
 
-    public int requestRide(int custId,int sourcLoc,int destLoc)
+    public boolean requestRide(int custId,int sourcLoc,int destLoc)
     {
         rideId++;
         int requestcount=0;
@@ -83,7 +83,7 @@ public class Ride {
             );
         } catch (UnsupportedEncodingException e) {
             System.out.println("ERROR: Unsupported encoding format!");
-            return -1;
+            return false;
         }
 
         URLConnection connection;
@@ -99,7 +99,7 @@ public class Ride {
             
         } catch (Exception e) {
             System.out.println("ERROR: Some error occured while trying to send sign-in request to ride service!");
-            return -1;
+            return false;
         }
 
         if(cabReqResponse=="true")
@@ -120,7 +120,7 @@ public class Ride {
             );
         } catch (UnsupportedEncodingException e) {
             System.out.println("ERROR: Unsupported encoding format!");
-            return -1;
+            return false;
         };
 
        // URLConnection connection;
@@ -136,7 +136,7 @@ public class Ride {
             
         } catch (Exception e) {
             System.out.println("ERROR: Some error occured while trying to send deduct Amount request to wallet service!");
-            return -1;
+            return false;
         }
 /****** 
  * 
@@ -159,7 +159,7 @@ public class Ride {
             );
         } catch (UnsupportedEncodingException e) {
             System.out.println("ERROR: Unsupported encoding format!");
-            return -1;
+            return false;
         }
 
       //  URLConnection connection;
@@ -174,14 +174,14 @@ public class Ride {
             
         } catch (Exception e) {
             System.out.println("ERROR: Some error occured while trying to send sign-in request to ride service!");
-            return -1;
+            return false;
         }
-            return -1;
+            return false;
         }
 
         //sending cabService.rideStarted 
 
-        String rideStartedURL = "http://localhost:8080/rideCanceled";
+        String rideStartedURL = "http://localhost:8080/rideStarted";
         //String charset = "UTF-8";
          paramCabId = String.format("%d", cabId); 
         paramrideId=String.format("%d", rideId);
@@ -193,7 +193,7 @@ public class Ride {
             );
         } catch (UnsupportedEncodingException e) {
             System.out.println("ERROR: Unsupported encoding format!");
-            return -1;
+            return false;
         }
 
       //  URLConnection connection;
@@ -208,7 +208,7 @@ public class Ride {
             
         } catch (Exception e) {
             System.out.println("ERROR: Some error occured while trying to send ride started request to cab service!");
-            return -1;
+            return false;
         }
         
         //update values of cab
@@ -222,7 +222,7 @@ public class Ride {
         custData.setRideId(rideId);
         custData.setState(Ridestate.STARTED);
 
-        return rideId;
+        return true;
 
         }
         i++;
@@ -232,7 +232,7 @@ public class Ride {
         
    // }
 }
-    return -1;
+    return false;
     
 }
 
@@ -275,7 +275,7 @@ public class Ride {
         }
         else if(data.state!=Cabstate.SIGNEDOUT)return (ridestate+" "+Pos);
 
-        return "-1";
+        return "false";
     }
 
     public boolean IsValidCabId(int cabId) // to be implemented 
