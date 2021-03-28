@@ -126,7 +126,7 @@ public class CabDataService {
             } catch (Exception e) {
                 System.out.println("ERROR: Some error occured while trying to send sign-out request to cab service!"+e);
             }
-
+            System.out.println("Resetting values for cab " + cab.cabId);
             cab.numRides = 0;
             cab.state = CabState.SIGNED_OUT;
             cab.rideId = -1;

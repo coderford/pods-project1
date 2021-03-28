@@ -64,13 +64,14 @@ public class Cab {
     public boolean requestRide(int rideId, int sourceLoc, int destinationLoc) {
     
         System.out.println("Recieved request for rideId: "+rideId+" source: "+sourceLoc+" dest: "+destinationLoc);
-        if(interested && state == CabState.AVAILABLE) {
-            if(interested) {
-                interested = false;
-            } else {
-                interested = true;
-                return false;
-            }
+        if(interested) {
+            interested = false;
+        } else {
+            interested = true;
+            return false;
+        }
+
+        if(state == CabState.AVAILABLE) {
 
             this.rideId = rideId;
             this.state = CabState.COMMITTED;
@@ -88,6 +89,7 @@ public class Cab {
 
         state = CabState.GIVING_RIDE;
         location = sourceLoc;
+        numRides++;
         return true;
     }
 
@@ -142,7 +144,6 @@ public class Cab {
         this.location = this.destinationLoc;
         this.sourceLoc = -1;
         this.destinationLoc = -1;
-        numRides++;
 
         return true;
     }
@@ -163,6 +164,7 @@ public class Cab {
             state = CabState.SIGNED_OUT;
             location = 0;
             interested = true;
+            numRides = 0;
             return true;
         }
         return false;

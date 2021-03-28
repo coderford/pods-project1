@@ -42,7 +42,6 @@ public class RideController {
             cab.location = cab.destinationLoc;
             cab.rideId = 0;
             cab.destinationLoc = 0;
-            cab.numRides += 1;
             cab.setState(CabState.AVAILABLE);
             cust.rideState=RideState.ENDED;
             cust.rideId=0;
@@ -175,7 +174,7 @@ public class RideController {
                         paramCabId = String.format("%d", cab.cabId);
                         paramrideId = String.format("%d", rideId);
                         try {
-                            query = String.format("cabId=%s&rideId",
+                            query = String.format("cabId=%s&rideId=%s",
                                     URLEncoder.encode(paramCabId, charset), 
                                     URLEncoder.encode(paramrideId, charset)
                             );
@@ -194,6 +193,7 @@ public class RideController {
                             scanner.close();
                         } catch (Exception e) {
                             System.out.println("ERROR: Some error occured while trying to send cancel request to cab service!");
+                            e.printStackTrace();
                             rideId--;
                             return -1;
                         }
@@ -234,6 +234,7 @@ public class RideController {
                     cab.setSourceLoc(sourceLoc);
                     cab.setDestLoc(destinationLoc);
                     cab.setCustId(custId);
+                    cab.numRides += 1;
 
                     // update values of customer
                     custData.setRideId(rideId);
@@ -260,6 +261,7 @@ public class RideController {
 
     @RequestMapping("/reset")
     public void reset() {
+        System.out.println("Resetting everything...");
         cabDataService.reset();
         custDataService.reset();
     }
