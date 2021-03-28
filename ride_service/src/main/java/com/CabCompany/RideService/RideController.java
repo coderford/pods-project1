@@ -108,7 +108,7 @@ public class RideController {
                 System.out.println("Cab " + cab.cabId + " is available. Sending request...");
                 requestCount++;
 
-                String requestRideURL = "http://localhost:8080/requestRide";
+                String requestRideURL = "http://10.11.0.4:8080/requestRide";
                 String charset = "UTF-8";
                 String paramCabId = String.format("%d", cab.cabId);
                 String paramrideId = String.format("%d", rideId);
@@ -148,7 +148,7 @@ public class RideController {
                     fare = 10 * (Math.abs(cab.location - sourceLoc) + Math.abs(sourceLoc - destinationLoc));
                     // deduct fare from wallet
                     System.out.println("deducting " + fare + " from wallet");
-                    String deductAmountURL = "http://localhost:8082/deductAmount";
+                    String deductAmountURL = "http://10.11.0.3:8082/deductAmount";
                     String paramcustId = String.format("%d", custId);
                     String paramfare = String.format("%d", fare);
                     try {
@@ -178,7 +178,7 @@ public class RideController {
 
                     if (amtDeductResponse.equals("false")) // Amount deduction failed. Cancel the ride
                     {
-                        String rideCancelURL = "http://localhost:8080/rideCanceled";
+                        String rideCancelURL = "http://10.11.0.4:8080/rideCanceled";
                         paramCabId = String.format("%d", cab.cabId);
                         paramrideId = String.format("%d", rideId);
                         try {
@@ -209,7 +209,7 @@ public class RideController {
                         return -1;
                     }
 
-                    String rideStartedURL = "http://localhost:8080/rideStarted";
+                    String rideStartedURL = "http://10.11.0.4:8080/rideStarted";
                     paramCabId = String.format("%d", cab.cabId);
                     paramrideId = String.format("%d", rideId);
                     try {
