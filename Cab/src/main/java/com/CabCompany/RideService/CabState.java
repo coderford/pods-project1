@@ -1,7 +1,7 @@
 package com.CabCompany.RideService;
 
-public enum Cabstate{
-    SIGNEDOUT,
+public enum CabState{
+    SIGNED_OUT,
     AVAILABLE,
     COMMITTED,
     GIVING_RIDE

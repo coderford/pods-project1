@@ -155,6 +155,7 @@ public class Cab {
         boolean signOutAllowed = (state != CabState.SIGNED_OUT && sendSignOutRequest(id));
         if(signOutAllowed) {
             state = CabState.SIGNED_OUT;
+            location = 0;
             return true;
         }
         return false;

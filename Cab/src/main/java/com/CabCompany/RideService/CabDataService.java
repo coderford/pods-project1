@@ -11,7 +11,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Scanner;
 
 import org.springframework.stereotype.Service;
@@ -21,9 +20,6 @@ public class CabDataService {
     private ArrayList<Cab> cabs = new ArrayList<>();
 
     public CabDataService() {
-        // cabs = new ArrayList<>(Arrays.asList(
-        // new Cab(1), new Cab(2), new Cab(3), new Cab(4)
-        // ));
         ArrayList<Integer> cabIds = new ArrayList<>();
         try {
             File inputFile = new File("IDs.txt");
@@ -38,9 +34,6 @@ public class CabDataService {
                     if (section == 1) {
                         cabIds.add(Integer.parseInt(line));
                     }
-                    // else if(section == 3) {
-                    // initBalance = Integer.parseInt(line);
-                    // }
                 }
             }
 
@@ -57,9 +50,7 @@ public class CabDataService {
 
     public void Displaycabs() {
         for (Cab cab : cabs) {
-            // Customer data=customers.get(i);
             System.out.println("cabId :" + cab.cabId + "  rideId:" + cab.rideId);
-
         }
     }
 
@@ -67,12 +58,23 @@ public class CabDataService {
         return cabs;
     }
 
-    public String cabStatus(int cabId) {
-
-        return "-1";
+    public String getCabStatus(int cabId) {
+        try {
+            Cab cab = cabs.stream().filter(c -> c.getId() == cabId).findFirst().get();
+            if (cab.rideState == RideState.GOING_ON) {
+                String stateString = cab.state.toString().toLowerCase().replaceAll("_", "-");
+                return (stateString + " " + cab.location + " " + cab.custId + " " + cab.destinationLoc);
+            } else if (cab.state != CabState.SIGNED_OUT) {
+                return (cab.rideState + " " + cab.location);
+            }
+            else return "-1";
+        }
+        catch(Exception e) {
+            return "-1";
+        }
     }
 
-    public Cab getCabId(int id) {
+    public Cab getCabWithId(int id) {
         try {
             return (cabs.stream().filter(c -> (c.cabId == id)).findFirst().get());
         } catch (Exception E) {
@@ -82,9 +84,7 @@ public class CabDataService {
 
     public void reset() {
         for (Cab cab : cabs) {
-
-            
-
+            // Send rideEnded request
             String rideEndedURL = "http://localhost:8080/rideEnded";
             String charset = "UTF-8";
             String paramCabId = String.format("%d", cab.cabId);
@@ -94,54 +94,47 @@ public class CabDataService {
                 query = String.format("cabId=%s&rideId=%s", URLEncoder.encode(paramCabId, charset),URLEncoder.encode(paramRideId, charset));
             } catch (UnsupportedEncodingException e) {
                 System.out.println("ERROR: Unsupported encoding format!");
-                // return false;
             }
             
-
             URLConnection connection;
             try {
                 connection = new URL(rideEndedURL + "?" + query).openConnection();
                 connection.setRequestProperty("Accept-Charset", charset);
+                InputStream response = connection.getInputStream();
+                Scanner scanner = new Scanner(response);
+                String responseBody = scanner.useDelimiter("\\A").next();
+            scanner.close();
             } catch (Exception e) {
-                System.out.println("ERROR: Some error occured while trying to send sign-out request to ride service!");
-                // return false;
+                System.out.println("ERROR: Some error occured while trying to send ride-ended request to ride service!");
             }
 
+            // Send signOut request
             String signOutURL = "http://localhost:8080/signOut";
-           // String charset = "UTF-8";
-           // String paramCabId = String.format("%d", cab.cabId);
-
-            //String query = "";
             try {
                 query = String.format("cabId=%s", URLEncoder.encode(paramCabId, charset));
             } catch (UnsupportedEncodingException e) {
                 System.out.println("ERROR: Unsupported encoding format!");
-                // return false;
             }
             
-
-           // URLConnection connection;
             try {
                 connection = new URL(signOutURL + "?" + query).openConnection();
                 connection.setRequestProperty("Accept-Charset", charset);
+                InputStream response = connection.getInputStream();
+                Scanner scanner = new Scanner(response);
+                String responseBody = scanner.useDelimiter("\\A").next();
+                scanner.close();
             } catch (Exception e) {
                 System.out.println("ERROR: Some error occured while trying to send sign-out request to ride service!");
-                // return false;
             }
 
-
-
             cab.numRides = 0;
-            cab.state = Cabstate.SIGNEDOUT;
-            cab.ridestate = Ridestate.ENDED;
+            cab.state = CabState.SIGNED_OUT;
+            cab.rideState = RideState.ENDED;
             cab.rideId = 0;
-            cab.initialPos = 0;
+            cab.location = 0;
             cab.sourceLoc = 0;
             cab.destinationLoc = 0;
             cab.custId = 0;
-
         }
-
     }
-
 }
