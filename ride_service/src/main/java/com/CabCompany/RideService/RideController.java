@@ -73,7 +73,7 @@ public class RideController {
     }
 
     @RequestMapping("/requestRide")
-    public boolean requestRide(
+    public int requestRide(
         @RequestParam int custId, 
         @RequestParam int sourceLoc,
         @RequestParam int destinationLoc
@@ -91,7 +91,7 @@ public class RideController {
         if(custData.rideState==RideState.STARTED)
         {
             System.out.println("Customer "+custId+" is already in a cab");
-            return false;
+            return -1;
         }
 
         while (i < cabs.size() || requestCount <= 3) {
@@ -114,7 +114,8 @@ public class RideController {
                             URLEncoder.encode(paramsourcLoc, charset), URLEncoder.encode(paramdestLoc, charset));
                 } catch (UnsupportedEncodingException e) {
                     System.out.println("ERROR: Unsupported encoding format!");
-                    return false;
+                    rideId--;
+                    return -1;
                 }
 
                 URLConnection connection;
@@ -129,7 +130,8 @@ public class RideController {
                     scanner.close();
                 } catch (Exception e) {
                     System.out.println("ERROR: Some error occured while trying to send ride request to cab service!");
-                    return false;
+                    rideId--;
+                    return -1;
                 }
 
                 if (cabReqResponse.equals("true")) {
@@ -149,7 +151,8 @@ public class RideController {
                         );
                     } catch (UnsupportedEncodingException e) {
                         System.out.println("ERROR: Unsupported encoding format!");
-                        return false;
+                        rideId--;
+                        return -1;
                     }
 
                     String amtDeductResponse;
@@ -163,7 +166,7 @@ public class RideController {
                     } catch (Exception e) {
                         System.out.println("ERROR: Some error occured while trying to send deduct Amount request to wallet service!");
                         rideId--;
-                        return false;
+                        return -1;
                     }
 
                     if (amtDeductResponse.equals("false")) // Amount deduction failed. Cancel the ride
@@ -179,7 +182,7 @@ public class RideController {
                         } catch (UnsupportedEncodingException e) {
                             System.out.println("ERROR: Unsupported encoding format!");
                             rideId--;
-                            return false;
+                            return -1;
                         }
 
                         try {
@@ -190,12 +193,12 @@ public class RideController {
                             cabReqResponse = scanner.useDelimiter("\\A").next();
                             scanner.close();
                         } catch (Exception e) {
-                            System.out.println("ERROR: Some error occured while trying to send sign-in request to ride service!");
+                            System.out.println("ERROR: Some error occured while trying to send cancel request to cab service!");
                             rideId--;
-                            return false;
+                            return -1;
                         }
                         rideId--;
-                        return false;
+                        return -1;
                     }
 
                     String rideStartedURL = "http://localhost:8080/rideStarted";
@@ -208,7 +211,7 @@ public class RideController {
                         );
                     } catch (UnsupportedEncodingException e) {
                         System.out.println("ERROR: Unsupported encoding format!");
-                        return false;
+                        return -1;
                     }
 
                     try {
@@ -221,11 +224,12 @@ public class RideController {
                     } catch (Exception e) {
                         System.out.println(
                                 "ERROR: Some error occured while trying to send ride started request to cab service!");
-                        return false;
+                        return -1;
                     }
 
                     // update values of cab
                     cab.setRideId(rideId);
+                    cab.location = sourceLoc;
                     cab.setState(CabState.GIVING_RIDE);
                     cab.setRideState(RideState.GOING_ON);
                     cab.setSourceLoc(sourceLoc);
@@ -236,17 +240,18 @@ public class RideController {
                     custData.setRideId(rideId);
                     custData.setRideState(RideState.STARTED);
 
-                    return true;
+                    System.out.println("Sending true...");
+                    return rideId;
                 }
             }
             if (requestCount == 3 || i == (cabs.size() - 1)) {
                 rideId--;
-                return false;
+                return -1;
             }
             i++;
             cab = cabs.get(i);
         }
-        return false;
+        return -1;
     }
 
     @RequestMapping("/getCabStatus")

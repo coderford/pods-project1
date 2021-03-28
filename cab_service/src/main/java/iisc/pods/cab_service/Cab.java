@@ -64,7 +64,7 @@ public class Cab {
     public boolean requestRide(int rideId, int sourceLoc, int destinationLoc) {
     
         System.out.println("Recieved request for rideId: "+rideId+" source: "+sourceLoc+" dest: "+destinationLoc);
-        if(state == CabState.AVAILABLE) {
+        if(interested && state == CabState.AVAILABLE) {
             if(interested) {
                 interested = false;
             } else {
@@ -76,6 +76,8 @@ public class Cab {
             this.state = CabState.COMMITTED;
             this.sourceLoc = sourceLoc;
             this.destinationLoc = destinationLoc;
+
+            System.out.println("Accepting ride request...");
             return true;
         }
         return false;
@@ -85,6 +87,7 @@ public class Cab {
         if(state != CabState.COMMITTED) return false;
 
         state = CabState.GIVING_RIDE;
+        location = sourceLoc;
         return true;
     }
 
@@ -104,11 +107,13 @@ public class Cab {
 
         String rideEndedURL = "http://localhost:8081/rideEnded";
         String charset = "UTF-8";
+        String paramCabId = String.format("%d", this.id);
         String paramRideId = String.format("%d", this.rideId);
 
         String query;
         try {
-            query =  String.format("rideId=%s",
+            query =  String.format("cabId=%s&rideId=%s",
+                URLEncoder.encode(paramCabId, charset),
                 URLEncoder.encode(paramRideId, charset)
             );
         } catch (UnsupportedEncodingException e) {
@@ -127,7 +132,8 @@ public class Cab {
 
             if(responseBody.equals("false")) return false;
         } catch (Exception e) {
-            System.out.println("ERROR: Some error occured while trying to send sign-out request to ride service!");
+            System.out.println("ERROR: Some error occured while trying to send ride-ended request to ride service!");
+            e.printStackTrace();
             return false;
         }
 
@@ -156,6 +162,7 @@ public class Cab {
         if(signOutAllowed) {
             state = CabState.SIGNED_OUT;
             location = 0;
+            interested = true;
             return true;
         }
         return false;
@@ -223,7 +230,7 @@ public class Cab {
 
             if(responseBody.equals("false")) return false;
         } catch (Exception e) {
-            System.out.println("ERROR: Some error occured while trying to send sign-out request to ride service!");
+            System.out.println("ERROR: Some error occured while trying to send sign-out request to ride service!" + e.getStackTrace());
             return false;
         }
 

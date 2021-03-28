@@ -6,7 +6,6 @@ package iisc.pods.cab_service;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Scanner;
 
 import org.springframework.stereotype.Service;

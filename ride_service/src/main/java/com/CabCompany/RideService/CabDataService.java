@@ -61,13 +61,13 @@ public class CabDataService {
     public String getCabStatus(int cabId) {
         try {
             Cab cab = cabs.stream().filter(c -> c.getId() == cabId).findFirst().get();
-            if (cab.rideState == RideState.GOING_ON) {
-                String stateString = cab.state.toString().toLowerCase().replaceAll("_", "-");
+            String stateString = cab.state.toString().toLowerCase().replaceAll("_", "-");
+            if (cab.state == CabState.GIVING_RIDE) {
                 return (stateString + " " + cab.location + " " + cab.custId + " " + cab.destinationLoc);
             } else if (cab.state != CabState.SIGNED_OUT) {
-                return (cab.rideState + " " + cab.location);
+                return (stateString + " " + cab.location);
             }
-            else return "-1";
+            else return "signed-out -1";
         }
         catch(Exception e) {
             return "-1";
@@ -124,7 +124,7 @@ public class CabDataService {
                 String responseBody = scanner.useDelimiter("\\A").next();
                 scanner.close();
             } catch (Exception e) {
-                System.out.println("ERROR: Some error occured while trying to send sign-out request to ride service!");
+                System.out.println("ERROR: Some error occured while trying to send sign-out request to cab service!"+e);
             }
 
             cab.numRides = 0;
