@@ -84,7 +84,15 @@ public class RideController {
         // cab selection mechanism
         int i = 0;
         ArrayList<Cab> cabs = cabDataService.getAllCabs();
-        Customer custData = custDataService.getCustWithId(custId);
+        Customer custData;
+
+        try {
+            custData = custDataService.getCustWithId(custId);
+        }
+        catch(Exception e) {
+            return -1;
+        }
+
         Cab cab = cabs.get(i);
 
         if(custData.rideState==RideState.STARTED)

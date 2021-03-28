@@ -52,11 +52,7 @@ public class CustDataService {
     }
 
     public Customer getCustWithId(int id) {
-        try {
-            return (customers.stream().filter(c -> (c.custId == id)).findFirst().get());
-        } catch (Exception e) {
-            return null;
-        }
+        return (customers.stream().filter(c -> (c.custId == id)).findFirst().get());
     }
 
     public void reset() {

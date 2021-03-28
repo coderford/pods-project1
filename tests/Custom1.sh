@@ -25,7 +25,7 @@ if [ "$rideId" != "-1" ];
 then
     echo "Ride by customer 201 started"
 else
-    echo "Ride to customer 201 denied"
+    echo "Ride by customer 201 denied"
     testPassed="no"
 fi
 

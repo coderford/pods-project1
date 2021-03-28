@@ -37,3 +37,5 @@ then
 else
     echo "Correct status for cab 101"
 fi
+
+echo "Test Passing Status: " $testPassed
