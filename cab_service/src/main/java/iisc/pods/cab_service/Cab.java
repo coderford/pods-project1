@@ -63,7 +63,7 @@ public class Cab {
 
     public boolean requestRide(int rideId, int sourceLoc, int destinationLoc) {
     
-        System.out.println("Recieved request for rideId :"+rideId+" source:"+sourceLoc+" dest="+destinationLoc);
+        System.out.println("Recieved request for rideId: "+rideId+" source: "+sourceLoc+" dest: "+destinationLoc);
         if(state == CabState.AVAILABLE) {
             if(interested) {
                 interested = false;
@@ -76,7 +76,6 @@ public class Cab {
             this.state = CabState.COMMITTED;
             this.sourceLoc = sourceLoc;
             this.destinationLoc = destinationLoc;
-            System.out.println("sending true response");
             return true;
         }
         return false;
@@ -126,7 +125,7 @@ public class Cab {
             String responseBody = scanner.useDelimiter("\\A").next();
             scanner.close();
 
-            if(responseBody == "false") return false;
+            if(responseBody.equals("false")) return false;
         } catch (Exception e) {
             System.out.println("ERROR: Some error occured while trying to send sign-out request to ride service!");
             return false;
@@ -188,7 +187,7 @@ public class Cab {
             String responseBody = scanner.useDelimiter("\\A").next();
             scanner.close();
 
-            if(responseBody == "false") return false;
+            if(responseBody.equals("false")) return false;
         } catch (Exception e) {
             System.out.println("ERROR: Some error occured while trying to send sign-in request to ride service!");
             return false;
@@ -221,7 +220,7 @@ public class Cab {
             String responseBody = scanner.useDelimiter("\\A").next();
             scanner.close();
 
-            if(responseBody == "false") return false;
+            if(responseBody.equals("false")) return false;
         } catch (Exception e) {
             System.out.println("ERROR: Some error occured while trying to send sign-out request to ride service!");
             return false;
