@@ -62,7 +62,6 @@ public class Cab {
     }
 
     public boolean requestRide(int rideId, int sourceLoc, int destinationLoc) {
-    
         System.out.println("Recieved request for rideId: "+rideId+" source: "+sourceLoc+" dest: "+destinationLoc);
         if(interested) {
             interested = false;
@@ -70,6 +69,8 @@ public class Cab {
             interested = true;
             return false;
         }
+
+        if(sourceLoc < 0 || destinationLoc < 0) return false;
 
         if(state == CabState.AVAILABLE) {
 
