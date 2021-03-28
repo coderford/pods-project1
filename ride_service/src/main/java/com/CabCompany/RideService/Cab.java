@@ -7,7 +7,6 @@ public class Cab {
 
     int rideId;
     int location;
-    RideState rideState;
     int sourceLoc;
     int destinationLoc;
     int custId=0;
@@ -20,11 +19,11 @@ public class Cab {
         this.cabId = cabId;
         this.numRides = 0;
         this.state = CabState.SIGNED_OUT;
-        this.rideId = 0;
-        this.location = 0;
-        this.custId=0;
-        this.sourceLoc = 0;
-        this.destinationLoc = 0;
+        this.rideId = -1;
+        this.location = -1;
+        this.custId = -1;
+        this.sourceLoc = -1;
+        this.destinationLoc = -1;
     }
 
     public int getId() {
@@ -68,10 +67,6 @@ public class Cab {
 
     public void incrNumRides() {
         this.numRides+=1;
-    }
-
-    public void setRideState(RideState state) {
-        this.rideState=state;
     }
 
     public void setCustId(int custId2) {

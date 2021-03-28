@@ -19,7 +19,7 @@ public class CabDataService {
         ArrayList<Integer> ids = new ArrayList<>();
 
         try {
-            File inputFile = new File("input.txt");
+            File inputFile = new File("IDs.txt");
             Scanner in = new Scanner(inputFile);
 
             int section = 0;

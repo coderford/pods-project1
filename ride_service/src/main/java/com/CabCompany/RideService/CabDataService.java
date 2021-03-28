@@ -48,7 +48,7 @@ public class CabDataService {
 
     }
 
-    public void Displaycabs() {
+    public void displayCabs() {
         for (Cab cab : cabs) {
             System.out.println("cabId :" + cab.cabId + "  rideId:" + cab.rideId);
         }
@@ -129,12 +129,11 @@ public class CabDataService {
 
             cab.numRides = 0;
             cab.state = CabState.SIGNED_OUT;
-            cab.rideState = RideState.ENDED;
-            cab.rideId = 0;
-            cab.location = 0;
-            cab.sourceLoc = 0;
-            cab.destinationLoc = 0;
-            cab.custId = 0;
+            cab.rideId = -1;
+            cab.location = -1;
+            cab.sourceLoc = -1;
+            cab.destinationLoc = -1;
+            cab.custId = -1;
         }
     }
 }

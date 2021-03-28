@@ -38,7 +38,7 @@ public class RideController {
     public boolean rideEnded(@RequestParam int cabId, @RequestParam int rideId) {
         Cab cab = cabDataService.getCabWithId(cabId);
         Customer cust=custDataService.getCustWithId(cab.custId);
-        if (cab.rideState == RideState.GOING_ON && cab.rideId == rideId) {
+        if (cab.state == CabState.GIVING_RIDE && cab.rideId == rideId) {
             cab.location = cab.destinationLoc;
             cab.rideId = 0;
             cab.destinationLoc = 0;
@@ -68,7 +68,7 @@ public class RideController {
     public boolean cabsignsOut(@RequestParam int cabId) {
         Cab cab = cabDataService.getCabWithId(cabId);
         cab.setState(CabState.SIGNED_OUT);
-        cab.location = 0;
+        cab.location = -1;
         return true;
     }
 
@@ -231,7 +231,6 @@ public class RideController {
                     cab.setRideId(rideId);
                     cab.location = sourceLoc;
                     cab.setState(CabState.GIVING_RIDE);
-                    cab.setRideState(RideState.GOING_ON);
                     cab.setSourceLoc(sourceLoc);
                     cab.setDestLoc(destinationLoc);
                     cab.setCustId(custId);

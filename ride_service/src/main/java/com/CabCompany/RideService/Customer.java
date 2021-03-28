@@ -10,8 +10,8 @@ public class Customer
     public Customer(int custId)
     {
         this.custId=custId;
-        this.sourceLoc=0;
-        this.rideId=0;
+        this.sourceLoc=-1;
+        this.rideId=-1;
         this.rideState=RideState.ENDED;
     }
 

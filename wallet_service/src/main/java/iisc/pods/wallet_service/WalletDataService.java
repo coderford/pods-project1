@@ -2,7 +2,6 @@ package iisc.pods.wallet_service;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Scanner;
 
 import org.springframework.stereotype.Service;
@@ -17,7 +16,7 @@ public class WalletDataService {
         int initBalance = 0;
 
         try {
-            File inputFile = new File("input.txt");
+            File inputFile = new File("IDs.txt");
             Scanner in = new Scanner(inputFile);
 
             int section = 0;
