@@ -1,4 +1,4 @@
-package com.CabCompany.Cab;
+package com.CabCompany.RideService;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
