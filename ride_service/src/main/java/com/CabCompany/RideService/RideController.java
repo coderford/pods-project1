@@ -95,12 +95,6 @@ public class RideController {
 
         Cab cab = cabs.get(i);
 
-        if(custData.rideState==RideState.STARTED)
-        {
-            System.out.println("Customer "+custId+" is already in a cab");
-            return -1;
-        }
-
         while (i < cabs.size() || requestCount <= 3) {
             // Send requset to available cabs
             System.out.println("Sending request to cab : " + cab.cabId);
