@@ -12,9 +12,10 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-
+@Configurable
 public class Ride {
     private int custId;
     private int cabId;
@@ -31,7 +32,8 @@ public class Ride {
     private CustDataService customerObj;
     @Autowired
     private CabDataService obj;
-/*
+    /*
+
     public Ride(int custId,int sourcLoc,int destLoc)
     {
         this.custId=custId;
@@ -46,7 +48,7 @@ public class Ride {
         this.signedIn=false;
     }
 */
-
+/*
     public boolean requestRide(int custId,int sourcLoc,int destLoc,int rideId)
     {
         this.rideId=rideId;
@@ -148,9 +150,7 @@ System.out.println("Sending request to cab : "+data.cabId);
             System.out.println("ERROR: Some error occured while trying to send deduct Amount request to wallet service!");
             return false;
         }
-/****** 
- * 
-*/
+
 
 
         if(amtDeductResponse == "false") // amount deduction failed cance the ride
@@ -159,7 +159,7 @@ System.out.println("Sending request to cab : "+data.cabId);
          String rideCancelURL = "http://localhost:8080/rideCanceled";
         //String charset = "UTF-8";
          paramCabId = String.format("%d", cabId); 
-        paramrideId=String.format("%d", rideId);
+         paramrideId=String.format("%d", rideId);
         try {
             query =  String.format("cabId=%s&rideId=%s&sourceLoc=%s&destinationLoc=%s",
                 URLEncoder.encode(paramCabId, charset),
@@ -251,7 +251,7 @@ System.out.println("Sending request to cab : "+data.cabId);
     return false;
     
 }
-
+*/
     public boolean cabSignsIn(int cabId, int Pos)
     {
      

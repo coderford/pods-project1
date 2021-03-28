@@ -76,6 +76,7 @@ public class Cab {
             this.state = CabState.COMMITTED;
             this.sourceLoc = sourceLoc;
             this.destinationLoc = destinationLoc;
+            System.out.println("sending true response");
             return true;
         }
         return false;
