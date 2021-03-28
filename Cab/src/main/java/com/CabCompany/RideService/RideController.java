@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RestController
 public class RideController {
 
+    int rideId=0;
     @Autowired
     private CabDataService cabobject;
 
@@ -37,6 +38,7 @@ public class RideController {
 
     @Autowired
     private CustDataService custobject;
+    
     @RequestMapping("/customers")
     public ArrayList<Customer> Displaycustomers()
     {
@@ -55,12 +57,21 @@ public class RideController {
     @RequestMapping("/rideEnded")
     public boolean rideEnded(@RequestParam int cabId, @RequestParam int rideId) {
         Cab data=cabobject.getCabId(cabId);
+        if(data.ridestate==Ridestate.GOING_ON && data.rideId==rideId)
+        {
+            data.initialPos=data.destinationLoc;
+        data.rideId=0;
+        data.destinationLoc=0;
+        data.numRides+=1;
         data.setState(Cabstate.AVAILABLE);
-
         return true;
+        }
+        
+
+        return false;
     }
 
-    @RequestMapping("/signsIn")
+    @RequestMapping("/cabSignsIn")
     public boolean cabSignsIn(@RequestParam int cabId, @RequestParam int initialPos) {
         try{
           Cab  data=cabobject.getCabId(cabId);
@@ -74,7 +85,7 @@ public class RideController {
         }
     }
 
-    @RequestMapping("/signsOut")
+    @RequestMapping("/cabSignsOut")
     public boolean cabsignsOut(@RequestParam int cabId) {
         Cab data=cabobject.getCabId(cabId);
         data.setState(Cabstate.SIGNEDOUT);
@@ -82,17 +93,32 @@ public class RideController {
     }
 
     @RequestMapping("/requestRide")
-    public  int  requestRide(@RequestParam int custId,@RequestParam int sourceLoc,@RequestParam int  destinationLoc)
+    public  boolean  requestRide(@RequestParam int custId,@RequestParam int sourceLoc,@RequestParam int  destinationLoc)
     {
         Ride riderequest=new Ride(); 
-        return riderequest.requestRide(custId, sourceLoc, destinationLoc);
+        rideId++;
+        if(!riderequest.requestRide(custId, sourceLoc, destinationLoc,rideId)){
+            rideId--;
+            return false;
+        }
+        return true;
     }
 
-    @RequestMapping("/getcabstatus")
+    @RequestMapping("/getCabStatus")
     public String getCabStatus(@RequestParam int cabId)
     {
-        Ride status=new Ride(); 
-        return status.getCabStatus(cabId);
+     /*   Ride status=new Ride(); 
+        return status.getCabStatus(cabId);*/
+
+        CabDataService obj=new CabDataService();
+        Cab data=obj.getCabId(cabId);
+        if(data.ridestate==Ridestate.GOING_ON)
+        {
+            return (data.ridestate+" "+data.initialPos+" "+data.custId+" "+data.destinationLoc);
+        }
+        else if(data.state!=Cabstate.SIGNEDOUT)return (data.ridestate+" "+data.initialPos);
+
+        return "false";
         
      //   return "-1";
     }
@@ -100,12 +126,10 @@ public class RideController {
     @RequestMapping("/reset")
     public void reset()
     {
-        
-       // CabDataService cabobject =new CabDataService();
-        cabobject.reset();
 
-       // CustDataService custobject=new  CustDataService();
+        cabobject.reset();
         custobject.reset();
+
     }
 
     

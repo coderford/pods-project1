@@ -12,6 +12,7 @@ public class Cab {
     Ridestate ridestate;
     int sourceLoc;
     int destinationLoc;
+    int custId=0;
 
     public Cab() {
 
@@ -23,6 +24,7 @@ public class Cab {
         this.state = Cabstate.SIGNEDOUT;
         this.rideId = 0;
         this.initialPos = 0;
+        this.custId=0;
       //  this.signedIn = false;
      //   this.interested = true;
         this.sourceLoc = 0;
@@ -74,6 +76,10 @@ public class Cab {
 
     public void setRidestate(Ridestate state) {
         this.ridestate=state;
+    }
+
+    public void setCustId(int custId2) {
+        this.custId=custId2;
     }
 
 }

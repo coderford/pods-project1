@@ -11,6 +11,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 
@@ -25,6 +26,11 @@ public class Ride {
     private int destLoc;
     private int fare;
     private boolean signedIn;
+
+    @Autowired
+    private CustDataService customerObj;
+    @Autowired
+    private CabDataService obj;
 /*
     public Ride(int custId,int sourcLoc,int destLoc)
     {
@@ -41,30 +47,32 @@ public class Ride {
     }
 */
 
-    public boolean requestRide(int custId,int sourcLoc,int destLoc)
+    public boolean requestRide(int custId,int sourcLoc,int destLoc,int rideId)
     {
-        rideId++;
+        this.rideId=rideId;
         int requestcount=0;
         //cab selection mechanism
         int i=0;
-        CabDataService obj=new CabDataService();
-        CustDataService customerObj=new CustDataService();
-        ArrayList<Customer> customers=customerObj.getAllCustomers();
+       // CabDataService obj=new CabDataService();
+      //  CustDataService customerObj=new CustDataService();
+       // ArrayList<Customer> customers=customerObj.getAllCustomers();
         ArrayList<Cab> cabs=obj.getAllCabs();
         Customer custData=customerObj.getCustId(custId);
         Cab data=cabs.get(i);
 
         
-        while(data!=null || requestcount!=3)
+        while(i<cabs.size() || requestcount<=3)
     {
         
         //Cab data=list.get(i);
       //  if(obj.getCabId(data.getId())!=0)
       //  {
 
-
-            if(data.getState()==cabstate.AVAILABLE) //send requset to available cabs
+//send requset to available cabs
+System.out.println("Sending request to cab : "+data.cabId);
+        if(data.state==Cabstate.AVAILABLE) 
         {
+            System.out.println("Cab :"+data.cabId+" is available sending reques");
          requestcount++;   
              // Reference: https://stackoverflow.com/a/2793153
         String requestRideURL = "http://localhost:8080/requestRide";
@@ -75,7 +83,7 @@ public class Ride {
         String paramdestLoc = String.format("%d", destLoc);
         String query;
         try {
-            query =  String.format("cabId=%s&riedId=%s&sourcLoc=%s&destLoc=%s",
+            query =  String.format("cabId=%s&rideId=%s&sourceLoc=%s&destinationLoc=%s",
                 URLEncoder.encode(paramCabId, charset),
                 URLEncoder.encode(paramrideId, charset),
                 URLEncoder.encode(paramsourcLoc, charset),
@@ -106,15 +114,17 @@ public class Ride {
         {
 
 
-              // cab acccepted request 
+        // cab acccepted request 
+        System.out.println(" cab : "+data.cabId +"  accepted");
         //deducting amount from wallet
-        fare=10*(Math.abs(Pos-sourcLoc)+Math.abs(sourcLoc-destLoc));
+        fare=10*(Math.abs(data.initialPos-sourcLoc)+Math.abs(sourcLoc-destLoc));
         //deduct fare from wallet
+        System.out.println("deducting  : "+fare +" from wallet");
         String deductAmountURL = "http://localhost:8082/deductAmount";
         String paramcustId = String.format("%d", custId); 
         String paramfare = String.format("%d", fare);
         try {
-            query =  String.format("custId=%s&Amount=%s",
+            query =  String.format("custId=%s&amount=%s",
                 URLEncoder.encode(paramcustId, charset),
                 URLEncoder.encode(paramfare, charset)
             );
@@ -151,7 +161,7 @@ public class Ride {
          paramCabId = String.format("%d", cabId); 
         paramrideId=String.format("%d", rideId);
         try {
-            query =  String.format("cabId=%s&riedId=%s&sourcLoc=%s&destLoc=%s",
+            query =  String.format("cabId=%s&rideId=%s&sourceLoc=%s&destinationLoc=%s",
                 URLEncoder.encode(paramCabId, charset),
                 URLEncoder.encode(paramrideId, charset),
                 URLEncoder.encode(paramsourcLoc, charset),
@@ -165,7 +175,7 @@ public class Ride {
       //  URLConnection connection;
        // String cabReqResponse;
         try {
-            connection = new URL(requestRideURL + "?" + query).openConnection();
+            connection = new URL(rideCancelURL + "?" + query).openConnection();
             connection.setRequestProperty("Accept-Charset", charset);
             InputStream response = connection.getInputStream();
            // Scanner scanner = new Scanner(response);
@@ -186,7 +196,7 @@ public class Ride {
          paramCabId = String.format("%d", cabId); 
         paramrideId=String.format("%d", rideId);
         try {
-            query =  String.format("cabId=%s&riedId=%s",
+            query =  String.format("cabId=%s&rideId=%s",
                 URLEncoder.encode(paramCabId, charset),
                 URLEncoder.encode(paramrideId, charset)
                 
@@ -218,6 +228,7 @@ public class Ride {
         data.setsourceLoc(sourcLoc);
         data.setDestLoc(destLoc);
         data.setNumRide();
+        data.setCustId(custId);
         //changing values of customer
         custData.setRideId(rideId);
         custData.setState(Ridestate.STARTED);
@@ -225,11 +236,16 @@ public class Ride {
         return true;
 
         }
-        i++;
-        data=cabs.get(i);
+        
 
      }  
-        
+     if(requestcount==3 || i==(cabs.size()-1))
+     {
+         return false;
+     }
+     i++;
+     data=cabs.get(i);
+     
    // }
 }
     return false;
@@ -265,7 +281,7 @@ public class Ride {
 
 
 
-    public String getCabStatus(int cabId)
+  /*  public String getCabStatus(int cabId)
     {
         CabDataService obj=new CabDataService();
         Cab data=obj.getCabId(cabId);
@@ -276,7 +292,7 @@ public class Ride {
         else if(data.state!=Cabstate.SIGNEDOUT)return (ridestate+" "+Pos);
 
         return "false";
-    }
+    }*/
 
     public boolean IsValidCabId(int cabId) // to be implemented 
     {
