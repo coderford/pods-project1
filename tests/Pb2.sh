@@ -11,6 +11,7 @@ testPassed="yes"
 resp=$(curl -s "http://localhost:8081/getCabStatus?cabId=101")
 if [ "$resp" != "signed-out -1" ];
 then
+    echo $resp
     echo "Invalid Status for the cab 101"
     testPassed="no"
 else
@@ -31,6 +32,7 @@ fi
 resp=$(curl -s "http://localhost:8081/getCabStatus?cabId=101")
 if [ "$resp" != "available 100" ];
 then
+    echo $resp
     echo "Invalid Status for the cab 101"
     testPassed="no"
 else
@@ -52,6 +54,7 @@ fi
 resp=$(curl -s "http://localhost:8081/getCabStatus?cabId=101")
 if [ "$resp" != "giving-ride 110 201 200" ];
 then
+    echo $resp
     echo "Invalid Status for the cab 101"
     testPassed="no"
 else
@@ -73,6 +76,7 @@ fi
 resp=$(curl -s "http://localhost:8081/getCabStatus?cabId=101")
 if [ "$resp" != "available 200" ];
 then
+    echo $resp
     echo "Invalid Status for the cab 101"
     testPassed="no"
 else
