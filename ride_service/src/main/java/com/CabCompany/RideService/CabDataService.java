@@ -92,7 +92,7 @@ public class CabDataService {
     public void reset() {
         for (Cab cab : cabs) {
             // Send rideEnded request
-            String rideEndedURL = "http://localhost:8080/rideEnded";
+            String rideEndedURL = "http://10.11.0.4:8080/rideEnded";
             String charset = "UTF-8";
             String paramCabId = String.format("%d", cab.cabId);
             String paramRideId = String.format("%d", cab.rideId);
@@ -116,7 +116,7 @@ public class CabDataService {
             }
 
             // Send signOut request
-            String signOutURL = "http://localhost:8080/signOut";
+            String signOutURL = "http://10.11.0.4:8080/signOut";
             try {
                 query = String.format("cabId=%s", URLEncoder.encode(paramCabId, charset));
             } catch (UnsupportedEncodingException e) {
