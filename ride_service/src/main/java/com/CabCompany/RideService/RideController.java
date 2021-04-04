@@ -21,13 +21,16 @@ public class RideController {
     @Autowired
     private CabDataService cabDataService;
 
+   
+
+    @Autowired
+    private CustDataService custDataService;
+
+
     @RequestMapping("/cabs")
     public ArrayList<Cab> Displaycabs() {
         return cabDataService.getAllCabs();
     }
-
-    @Autowired
-    private CustDataService custDataService;
 
     @RequestMapping("/customers")
     public ArrayList<Customer> Displaycustomers() {

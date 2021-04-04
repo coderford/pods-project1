@@ -4,6 +4,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -11,7 +14,11 @@ public class CustDataService {
 
     private ArrayList<Customer> customers = new ArrayList<>();
 
-    public CustDataService() {
+    CustRepo repo;
+    
+    @Autowired
+    public CustDataService(CustRepo repo) {
+        this.repo=repo;
         ArrayList<Integer> custIds = new ArrayList<>();
 
         try {
@@ -36,7 +43,9 @@ public class CustDataService {
         }
 
         for (int custId : custIds) {
-            customers.add(new Customer(custId));
+            Customer customer=new Customer(custId);
+            customers.add(customer);
+            repo.save(customer);
         }
 
     }

@@ -13,13 +13,18 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class CabDataService {
     private ArrayList<Cab> cabs = new ArrayList<>();
 
-    public CabDataService() {
+    
+    RideRepo repo;
+    @Autowired
+    public CabDataService(RideRepo repo) {
+        this.repo=repo;
         ArrayList<Integer> cabIds = new ArrayList<>();
         try {
             File inputFile = new File("IDs.txt");
@@ -43,7 +48,9 @@ public class CabDataService {
         }
 
         for (int cabId : cabIds) {
-            cabs.add(new Cab(cabId));
+            Cab cab=new Cab(cabId);
+            cabs.add(cab);
+            repo.save(cab);
         }
 
     }

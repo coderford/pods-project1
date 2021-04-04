@@ -1,7 +1,12 @@
 package com.CabCompany.RideService;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+@Entity
 public class Customer
 {
+    @Id
     int custId;
     int sourceLoc;
     int rideId;
@@ -13,6 +18,8 @@ public class Customer
         this.sourceLoc=-1;
         this.rideId=-1;
         this.rideState=RideState.ENDED;
+    }
+    public Customer(){
     }
 
     public int getCustId()

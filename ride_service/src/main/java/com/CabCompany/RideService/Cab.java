@@ -1,6 +1,11 @@
 package com.CabCompany.RideService;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+@Entity
 public class Cab {
+    @Id
     int cabId;
     int numRides;
     CabState state;
