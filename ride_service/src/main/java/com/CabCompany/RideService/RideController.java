@@ -9,6 +9,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Scanner;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,11 @@ public class RideController {
     @Autowired
     private CabDataService cabDataService;
 
-   
+   @Autowired
+   RideRepo cabrepo;
+
+   @Autowired
+   CustRepo custrepo;
 
     @Autowired
     private CustDataService custDataService;
@@ -39,15 +44,19 @@ public class RideController {
 
     @RequestMapping("/rideEnded")
     public boolean rideEnded(@RequestParam int cabId, @RequestParam int rideId) {
-        Cab cab = cabDataService.getCabWithId(cabId);
-        Customer cust=custDataService.getCustWithId(cab.custId);
-        if (cab.state == CabState.GIVING_RIDE && cab.rideId == rideId) {
-            cab.location = cab.destinationLoc;
-            cab.rideId = 0;
-            cab.destinationLoc = 0;
-            cab.setState(CabState.AVAILABLE);
-            cust.rideState=RideState.ENDED;
-            cust.rideId=0;
+       // Cab cab = cabDataService.getCabWithId(cabId);
+        Cab cabInDB=cabrepo.findById(cabId).get();
+        Customer custInDB=custrepo.findById(cabInDB.custId).get();
+       // Customer cust=custDataService.getCustWithId(cabInDB.custId);
+        if (cabInDB.state.equals(CabState.GIVING_RIDE.toString()) && cabInDB.rideId == rideId) {
+            cabInDB.location = cabInDB.destinationLoc;
+            cabInDB.rideId = 0;
+            cabInDB.destinationLoc = 0;
+            cabInDB.setState(CabState.AVAILABLE);
+            custInDB.rideState=RideState.ENDED.toString();
+            custInDB.rideId=0;
+            cabrepo.save(cabInDB);
+            custrepo.save(custInDB);
             return true;
         }
 
@@ -57,9 +66,13 @@ public class RideController {
     @RequestMapping("/cabSignsIn")
     public boolean cabSignsIn(@RequestParam int cabId, @RequestParam int initialPos) {
         try {
-            Cab cab = cabDataService.getCabWithId(cabId);
+            Cab cabInDB=cabrepo.findById(cabId).get();
+            cabInDB.state=CabState.AVAILABLE.toString();
+            cabInDB.location=initialPos;
+            cabrepo.save(cabInDB);
+          /*  Cab cab = cabDataService.getCabWithId(cabId);
             cab.location = initialPos;
-            cab.setState(CabState.AVAILABLE);
+            cab.setState(CabState.AVAILABLE);*/
             return true;
         } catch (Exception e) {
             return false;
@@ -68,9 +81,10 @@ public class RideController {
 
     @RequestMapping("/cabSignsOut")
     public boolean cabsignsOut(@RequestParam int cabId) {
-        Cab cab = cabDataService.getCabWithId(cabId);
+        Cab cab = cabrepo.findById(cabId).get();
         cab.setState(CabState.SIGNED_OUT);
         cab.location = -1;
+        cabrepo.save(cab);
         return true;
     }
 
@@ -86,26 +100,26 @@ public class RideController {
 
         // cab selection mechanism
         int i = 0;
-        ArrayList<Cab> cabs = cabDataService.getAllCabs();
+        Iterable<Cab> cabs =cabrepo.findAll();
         Customer custData;
 
         try {
-            custData = custDataService.getCustWithId(custId);
+            custData = custrepo.findById(custId).get();
         }
         catch(Exception e) {
             return -1;
         }
+        Iterator<Cab> iterator=cabs.iterator();
+        Cab cab = iterator.next();
 
-        Cab cab = cabs.get(i);
-
-        while (i < cabs.size() || requestCount <= 3) {
+        while (iterator.hasNext() || requestCount <= 3) {
             // Send requset to available cabs
             System.out.println("Sending request to cab : " + cab.cabId);
-            if (cab.state == CabState.AVAILABLE) {
+            if (cab.state.equals(CabState.AVAILABLE.toString())) {
                 System.out.println("Cab " + cab.cabId + " is available. Sending request...");
                 requestCount++;
 
-                String requestRideURL = "http://10.11.0.4:8080/requestRide";
+                String requestRideURL = "http://localhost:8080/requestRide";
                 String charset = "UTF-8";
                 String paramCabId = String.format("%d", cab.cabId);
                 String paramrideId = String.format("%d", rideId);
@@ -175,7 +189,7 @@ public class RideController {
 
                     if (amtDeductResponse.equals("false")) // Amount deduction failed. Cancel the ride
                     {
-                        String rideCancelURL = "http://10.11.0.4:8080/rideCanceled";
+                        String rideCancelURL = "http://localhost:8080/rideCanceled";
                         paramCabId = String.format("%d", cab.cabId);
                         paramrideId = String.format("%d", rideId);
                         try {
@@ -206,7 +220,7 @@ public class RideController {
                         return -1;
                     }
 
-                    String rideStartedURL = "http://10.11.0.4:8080/rideStarted";
+                    String rideStartedURL = "http://localhost:8080/rideStarted";
                     paramCabId = String.format("%d", cab.cabId);
                     paramrideId = String.format("%d", rideId);
                     try {
@@ -233,6 +247,7 @@ public class RideController {
                     }
 
                     // update values of cab
+                   // Cab cab
                     cab.setRideId(rideId);
                     cab.location = sourceLoc;
                     cab.setState(CabState.GIVING_RIDE);
@@ -240,21 +255,23 @@ public class RideController {
                     cab.setDestLoc(destinationLoc);
                     cab.setCustId(custId);
                     cab.numRides += 1;
+                    cabrepo.save(cab);
 
                     // update values of customer
                     custData.setRideId(rideId);
                     custData.setRideState(RideState.STARTED);
+                    custrepo.save(custData);
 
                     System.out.println("Sending true...");
                     return rideId;
                 }
             }
-            if (requestCount == 3 || i == (cabs.size() - 1)) {
+            if (requestCount == 3 || !iterator.hasNext()) {
                 rideId--;
                 return -1;
             }
-            i++;
-            cab = cabs.get(i);
+          //  i++;
+            cab =iterator.next();
         }
         return -1;
     }

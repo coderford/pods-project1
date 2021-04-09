@@ -8,7 +8,7 @@ public class Cab {
     @Id
     int cabId;
     int numRides;
-    CabState state;
+    String state;
 
     int rideId;
     int location;
@@ -23,7 +23,7 @@ public class Cab {
     public Cab(int cabId) {
         this.cabId = cabId;
         this.numRides = 0;
-        this.state = CabState.SIGNED_OUT;
+        this.state = CabState.SIGNED_OUT.toString();
         this.rideId = -1;
         this.location = -1;
         this.custId = -1;
@@ -42,7 +42,7 @@ public class Cab {
         return numRides;
     }
 
-    public CabState getState() {
+    public String getState() {
         return state;
     }
 
@@ -51,7 +51,7 @@ public class Cab {
     }
 
     public boolean isSignedIn() {
-        return (state != CabState.SIGNED_OUT);
+        return (!state.equals(CabState.SIGNED_OUT.toString()));
     }
 
     public void setRideId(int id) {
@@ -59,7 +59,7 @@ public class Cab {
     }
 
     public void setState(CabState State) {
-        this.state=State;
+        this.state=State.toString();
     }
 
     public void setSourceLoc(int sourcLoc) {

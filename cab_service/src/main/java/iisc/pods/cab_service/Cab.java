@@ -108,7 +108,7 @@ public class Cab {
         if(this.state != CabState.GIVING_RIDE || this.rideId != rideId)
             return false;
 
-        String rideEndedURL = "http://10.11.0.2:8081/rideEnded";
+        String rideEndedURL = "http://localhost:8081/rideEnded";
         String charset = "UTF-8";
         String paramCabId = String.format("%d", this.id);
         String paramRideId = String.format("%d", this.rideId);
@@ -173,7 +173,7 @@ public class Cab {
 
     public boolean sendSignInRequest(int id, int initialPos) {
         // Reference: https://stackoverflow.com/a/2793153
-        String signInURL = "http://10.11.0.2:8081/cabSignsIn";
+        String signInURL = "http://localhost:8081/cabSignsIn";
         String charset = "UTF-8";
         String paramCabId = String.format("%d", id);
         String paramInitialPos = String.format("%d", initialPos);
@@ -208,7 +208,7 @@ public class Cab {
     }
     
     public boolean sendSignOutRequest(int id) {
-        String signOutURL = "http://10.11.0.2:8081/cabSignsOut";
+        String signOutURL = "http://localhost:8081/cabSignsOut";
         String charset = "UTF-8";
         String paramCabId = String.format("%d", id);
 

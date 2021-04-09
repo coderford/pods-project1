@@ -10,14 +10,14 @@ public class Customer
     int custId;
     int sourceLoc;
     int rideId;
-    RideState rideState;
+    String rideState;
 
     public Customer(int custId)
     {
         this.custId=custId;
         this.sourceLoc=-1;
         this.rideId=-1;
-        this.rideState=RideState.ENDED;
+        this.rideState=RideState.ENDED.toString();
     }
     public Customer(){
     }
@@ -36,7 +36,7 @@ public class Customer
         return rideId;
     }
 
-    public RideState getRideState()
+    public String getRideState()
     {
         return rideState;
     }
@@ -45,6 +45,6 @@ public class Customer
         this.rideId=rideId2;
     }
     public void setRideState(RideState started) {
-        this.rideState=started; 
+        this.rideState=started.toString(); 
     }
 }

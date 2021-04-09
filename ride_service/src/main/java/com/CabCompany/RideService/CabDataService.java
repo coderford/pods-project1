@@ -68,11 +68,14 @@ public class CabDataService {
     public String getCabStatus(int cabId) {
         try {
             Cab cab = cabs.stream().filter(c -> c.getId() == cabId).findFirst().get();
-            String stateString = cab.state.toString().toLowerCase().replaceAll("_", "-");
-            if (cab.state == CabState.GIVING_RIDE) {
-                return (stateString + " " + cab.location + " " + cab.custId + " " + cab.destinationLoc);
-            } else if (cab.state != CabState.SIGNED_OUT) {
-                return (stateString + " " + cab.location);
+            Cab cabInDB=repo.findById(cabId).get();
+           // String stateStr = cabInDB.state.toString().toLowerCase().replaceAll("_", "-");
+            String stateStr = cabInDB.state.toString();
+            //String stateString = cab.state.toString().toLowerCase().replaceAll("_", "-");
+            if (cab.state.equals(CabState.GIVING_RIDE.toString())) {
+                return (stateStr + " " + cab.location + " " + cab.custId + " " + cab.destinationLoc);
+            } else if (!cabInDB.state.equals(CabState.SIGNED_OUT.toString())) {
+                return (stateStr + " " + cab.location);
             }
             else return "signed-out -1";
         }
@@ -83,7 +86,8 @@ public class CabDataService {
 
     public Cab getCabWithId(int id) {
         try {
-            return (cabs.stream().filter(c -> (c.cabId == id)).findFirst().get());
+          //  return (cabs.stream().filter(c -> (c.cabId == id)).findFirst().get());
+            return repo.findById(id).get();
         } catch (Exception E) {
             return null;
         }
@@ -92,7 +96,7 @@ public class CabDataService {
     public void reset() {
         for (Cab cab : cabs) {
             // Send rideEnded request
-            String rideEndedURL = "http://10.11.0.4:8080/rideEnded";
+            String rideEndedURL = "http://localhost:8080/rideEnded";
             String charset = "UTF-8";
             String paramCabId = String.format("%d", cab.cabId);
             String paramRideId = String.format("%d", cab.rideId);
@@ -116,7 +120,7 @@ public class CabDataService {
             }
 
             // Send signOut request
-            String signOutURL = "http://10.11.0.4:8080/signOut";
+            String signOutURL = "http://localhost:8080/signOut";
             try {
                 query = String.format("cabId=%s", URLEncoder.encode(paramCabId, charset));
             } catch (UnsupportedEncodingException e) {
@@ -135,12 +139,13 @@ public class CabDataService {
             }
             System.out.println("Resetting values for cab " + cab.cabId);
             cab.numRides = 0;
-            cab.state = CabState.SIGNED_OUT;
+            cab.state = CabState.SIGNED_OUT.toString();
             cab.rideId = -1;
             cab.location = -1;
             cab.sourceLoc = -1;
             cab.destinationLoc = -1;
             cab.custId = -1;
+            repo.save(cab);
         }
     }
 }
