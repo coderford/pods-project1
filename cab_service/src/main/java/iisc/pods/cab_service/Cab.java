@@ -150,8 +150,9 @@ public class Cab {
     }
 
     public boolean signIn(int initialPos) {
-        boolean signInAllowed = (state == CabState.SIGNED_OUT && sendSignInRequest(id, initialPos));
-        if(signInAllowed) {
+        boolean signInAllowed = (state == CabState.SIGNED_OUT && initialPos >= 0);
+
+        if(signInAllowed && sendSignInRequest(id, initialPos)) {
             state = CabState.AVAILABLE;
             location = initialPos;
             return true;
@@ -160,8 +161,12 @@ public class Cab {
     }
 
     public boolean signOut() {
-        boolean signOutAllowed = (state != CabState.SIGNED_OUT && sendSignOutRequest(id));
-        if(signOutAllowed) {
+        // Cab shouldn't already be signed out, or in giving-ride or committed state
+        boolean signOutAllowed = (state != CabState.SIGNED_OUT &&
+                                  state != CabState.GIVING_RIDE &&
+                                  state != CabState.COMMITTED);
+
+        if(signOutAllowed && sendSignOutRequest(id)) {
             state = CabState.SIGNED_OUT;
             location = 0;
             interested = true;
