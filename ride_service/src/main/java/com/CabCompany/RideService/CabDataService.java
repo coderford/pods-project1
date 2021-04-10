@@ -86,6 +86,7 @@ public class CabDataService {
 
 
     public void reset() {
+        init();
         ArrayList<Cab> cabs=getAllCabs();
         for (Cab cab : cabs) {
             // Send rideEnded request

@@ -33,12 +33,7 @@ public class RideController {
     @Autowired
     private CustDataService custDataService;
 
-    @RequestMapping("/")
-    public void init()
-    {
-         cabDataService.init();
-         custDataService.init();
-    }
+    
     @RequestMapping("/cabs")
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public ArrayList<Cab> Displaycabs() {
