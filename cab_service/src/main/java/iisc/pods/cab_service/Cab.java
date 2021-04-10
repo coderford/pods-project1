@@ -61,8 +61,16 @@ public class Cab {
         return interested;
     }
 
-    public boolean requestRide(int rideId, int sourceLoc, int destinationLoc) {
+    public synchronized boolean requestRide(int rideId, int sourceLoc, int destinationLoc) {
         System.out.println("Recieved request for rideId: "+rideId+" source: "+sourceLoc+" dest: "+destinationLoc);
+        try {
+            Thread.sleep(20000);
+        }
+        catch(Exception e) {
+            System.out.println("Sleep interrupted!");
+        }
+        System.out.println("Sleep ended");
+
         if(interested) {
             interested = false;
         } else {
@@ -82,6 +90,7 @@ public class Cab {
             System.out.println("Accepting ride request...");
             return true;
         }
+
         return false;
     }
 
