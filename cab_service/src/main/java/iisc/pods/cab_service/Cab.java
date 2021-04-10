@@ -63,13 +63,6 @@ public class Cab {
 
     public synchronized boolean requestRide(int rideId, int sourceLoc, int destinationLoc) {
         System.out.println("Recieved request for rideId: "+rideId+" source: "+sourceLoc+" dest: "+destinationLoc);
-        try {
-            Thread.sleep(20000);
-        }
-        catch(Exception e) {
-            System.out.println("Sleep interrupted!");
-        }
-        System.out.println("Sleep ended");
 
         if(interested) {
             interested = false;
