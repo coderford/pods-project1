@@ -4,47 +4,44 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 
 @Entity
-public class Customer
-{
+public class Customer {
     @Id
     int custId;
     int sourceLoc;
     int rideId;
     String rideState;
 
-    public Customer(int custId)
-    {
-        this.custId=custId;
-        this.sourceLoc=-1;
-        this.rideId=-1;
-        this.rideState=RideState.ENDED.toString();
-    }
-    public Customer(){
+    public Customer(int custId) {
+        this.custId = custId;
+        this.sourceLoc = -1;
+        this.rideId = -1;
+        this.rideState = RideState.ENDED.toString();
     }
 
-    public int getCustId()
-    {
+    public Customer() {
+    }
+
+    public int getCustId() {
         return custId;
     }
 
-    public int getCustLoc()
-    {
+    public int getCustLoc() {
         return sourceLoc;
     }
-    public int getRideId()
-    {
+
+    public int getRideId() {
         return rideId;
     }
 
-    public String getRideState()
-    {
+    public String getRideState() {
         return rideState;
     }
 
     public void setRideId(int rideId2) {
-        this.rideId=rideId2;
+        this.rideId = rideId2;
     }
+
     public void setRideState(RideState started) {
-        this.rideState=started.toString(); 
+        this.rideState = started.toString();
     }
 }

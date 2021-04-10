@@ -47,11 +47,19 @@ public class CabDataService {
             System.out.println("ERROR: Could not read input file!");
         }
 
-        for (int cabId : cabIds) {
-            Cab cab=new Cab(cabId);
-            cabs.add(cab);
-            repo.save(cab);
-        }
+        
+
+            for (int cabId : cabIds) {
+                if(!repo.findById(cabId).get().equals(null))
+                {
+                    break;
+                }
+                Cab cab=new Cab(cabId);
+                cabs.add(cab);
+                repo.save(cab);
+            }
+        
+        
 
     }
 

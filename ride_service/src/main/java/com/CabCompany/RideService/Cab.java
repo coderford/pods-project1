@@ -14,7 +14,7 @@ public class Cab {
     int location;
     int sourceLoc;
     int destinationLoc;
-    int custId=0;
+    int custId = 0;
 
     public Cab() {
 
@@ -38,6 +38,7 @@ public class Cab {
     public int getRideId() {
         return rideId;
     }
+
     public int getNumRides() {
         return numRides;
     }
@@ -55,26 +56,26 @@ public class Cab {
     }
 
     public void setRideId(int id) {
-        this.rideId=id;
+        this.rideId = id;
     }
 
     public void setState(CabState State) {
-        this.state=State.toString();
+        this.state = State.toString();
     }
 
     public void setSourceLoc(int sourcLoc) {
-        this.sourceLoc=sourcLoc;
+        this.sourceLoc = sourcLoc;
     }
 
     public void setDestLoc(int destLoc) {
-        this.destinationLoc=destLoc;
+        this.destinationLoc = destLoc;
     }
 
     public void incrNumRides() {
-        this.numRides+=1;
+        this.numRides += 1;
     }
 
     public void setCustId(int custId2) {
-        this.custId=custId2;
+        this.custId = custId2;
     }
 }

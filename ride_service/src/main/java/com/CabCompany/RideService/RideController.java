@@ -13,6 +13,8 @@ import java.util.Iterator;
 import java.util.Scanner;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
@@ -22,17 +24,17 @@ public class RideController {
     @Autowired
     private CabDataService cabDataService;
 
-   @Autowired
-   RideRepo cabrepo;
+    @Autowired
+    RideRepo cabrepo;
 
-   @Autowired
-   CustRepo custrepo;
+    @Autowired
+    CustRepo custrepo;
 
     @Autowired
     private CustDataService custDataService;
 
-
     @RequestMapping("/cabs")
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public ArrayList<Cab> Displaycabs() {
         return cabDataService.getAllCabs();
     }
@@ -44,17 +46,17 @@ public class RideController {
 
     @RequestMapping("/rideEnded")
     public boolean rideEnded(@RequestParam int cabId, @RequestParam int rideId) {
-       // Cab cab = cabDataService.getCabWithId(cabId);
-        Cab cabInDB=cabrepo.findById(cabId).get();
-        Customer custInDB=custrepo.findById(cabInDB.custId).get();
-       // Customer cust=custDataService.getCustWithId(cabInDB.custId);
+        // Cab cab = cabDataService.getCabWithId(cabId);
+        Cab cabInDB = cabrepo.findById(cabId).get();
+        Customer custInDB = custrepo.findById(cabInDB.custId).get();
+        // Customer cust=custDataService.getCustWithId(cabInDB.custId);
         if (cabInDB.state.equals(CabState.GIVING_RIDE.toString()) && cabInDB.rideId == rideId) {
             cabInDB.location = cabInDB.destinationLoc;
             cabInDB.rideId = 0;
             cabInDB.destinationLoc = 0;
             cabInDB.setState(CabState.AVAILABLE);
-            custInDB.rideState=RideState.ENDED.toString();
-            custInDB.rideId=0;
+            custInDB.rideState = RideState.ENDED.toString();
+            custInDB.rideId = 0;
             cabrepo.save(cabInDB);
             custrepo.save(custInDB);
             return true;
@@ -64,15 +66,17 @@ public class RideController {
     }
 
     @RequestMapping("/cabSignsIn")
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public boolean cabSignsIn(@RequestParam int cabId, @RequestParam int initialPos) {
         try {
-            Cab cabInDB=cabrepo.findById(cabId).get();
-            cabInDB.state=CabState.AVAILABLE.toString();
-            cabInDB.location=initialPos;
+            Cab cabInDB = cabrepo.findById(cabId).get();
+            cabInDB.state = CabState.AVAILABLE.toString();
+            cabInDB.location = initialPos;
             cabrepo.save(cabInDB);
-          /*  Cab cab = cabDataService.getCabWithId(cabId);
-            cab.location = initialPos;
-            cab.setState(CabState.AVAILABLE);*/
+            /*
+             * Cab cab = cabDataService.getCabWithId(cabId); cab.location = initialPos;
+             * cab.setState(CabState.AVAILABLE);
+             */
             return true;
         } catch (Exception e) {
             return false;
@@ -89,27 +93,23 @@ public class RideController {
     }
 
     @RequestMapping("/requestRide")
-    public int requestRide(
-        @RequestParam int custId, 
-        @RequestParam int sourceLoc,
-        @RequestParam int destinationLoc
-    ) {
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    public String requestRide(@RequestParam int custId, @RequestParam int sourceLoc, @RequestParam int destinationLoc) {
         rideId++;
-        int fare=0;
+        int fare = 0;
         int requestCount = 0;
 
         // cab selection mechanism
         int i = 0;
-        Iterable<Cab> cabs =cabrepo.findAll();
+        Iterable<Cab> cabs = cabrepo.findAll();
         Customer custData;
 
         try {
             custData = custrepo.findById(custId).get();
+        } catch (Exception e) {
+            return "-1";
         }
-        catch(Exception e) {
-            return -1;
-        }
-        Iterator<Cab> iterator=cabs.iterator();
+        Iterator<Cab> iterator = cabs.iterator();
         Cab cab = iterator.next();
 
         while (iterator.hasNext() || requestCount <= 3) {
@@ -133,7 +133,7 @@ public class RideController {
                 } catch (UnsupportedEncodingException e) {
                     System.out.println("ERROR: Unsupported encoding format!");
                     rideId--;
-                    return -1;
+                    return "-1";
                 }
 
                 URLConnection connection;
@@ -144,12 +144,12 @@ public class RideController {
                     InputStream response = connection.getInputStream();
                     Scanner scanner = new Scanner(response);
                     cabReqResponse = scanner.useDelimiter("\\A").next();
-                    System.out.println("Cab response: "+cabReqResponse);
+                    System.out.println("Cab response: " + cabReqResponse);
                     scanner.close();
                 } catch (Exception e) {
                     System.out.println("ERROR: Some error occured while trying to send ride request to cab service!");
                     rideId--;
-                    return -1;
+                    return "-1";
                 }
 
                 if (cabReqResponse.equals("true")) {
@@ -163,14 +163,12 @@ public class RideController {
                     String paramcustId = String.format("%d", custId);
                     String paramfare = String.format("%d", fare);
                     try {
-                        query = String.format("custId=%s&amount=%s", 
-                            URLEncoder.encode(paramcustId, charset),
-                            URLEncoder.encode(paramfare, charset)
-                        );
+                        query = String.format("custId=%s&amount=%s", URLEncoder.encode(paramcustId, charset),
+                                URLEncoder.encode(paramfare, charset));
                     } catch (UnsupportedEncodingException e) {
                         System.out.println("ERROR: Unsupported encoding format!");
                         rideId--;
-                        return -1;
+                        return "-1";
                     }
 
                     String amtDeductResponse;
@@ -182,9 +180,10 @@ public class RideController {
                         amtDeductResponse = scanner.useDelimiter("\\A").next();
                         scanner.close();
                     } catch (Exception e) {
-                        System.out.println("ERROR: Some error occured while trying to send deduct Amount request to wallet service!");
+                        System.out.println(
+                                "ERROR: Some error occured while trying to send deduct Amount request to wallet service!");
                         rideId--;
-                        return -1;
+                        return "-1";
                     }
 
                     if (amtDeductResponse.equals("false")) // Amount deduction failed. Cancel the ride
@@ -193,14 +192,12 @@ public class RideController {
                         paramCabId = String.format("%d", cab.cabId);
                         paramrideId = String.format("%d", rideId);
                         try {
-                            query = String.format("cabId=%s&rideId=%s",
-                                    URLEncoder.encode(paramCabId, charset), 
-                                    URLEncoder.encode(paramrideId, charset)
-                            );
+                            query = String.format("cabId=%s&rideId=%s", URLEncoder.encode(paramCabId, charset),
+                                    URLEncoder.encode(paramrideId, charset));
                         } catch (UnsupportedEncodingException e) {
                             System.out.println("ERROR: Unsupported encoding format!");
                             rideId--;
-                            return -1;
+                            return "-1";
                         }
 
                         try {
@@ -211,26 +208,25 @@ public class RideController {
                             cabReqResponse = scanner.useDelimiter("\\A").next();
                             scanner.close();
                         } catch (Exception e) {
-                            System.out.println("ERROR: Some error occured while trying to send cancel request to cab service!");
+                            System.out.println(
+                                    "ERROR: Some error occured while trying to send cancel request to cab service!");
                             e.printStackTrace();
                             rideId--;
-                            return -1;
+                            return "-1";
                         }
                         rideId--;
-                        return -1;
+                        return "-1";
                     }
 
                     String rideStartedURL = "http://localhost:8080/rideStarted";
                     paramCabId = String.format("%d", cab.cabId);
                     paramrideId = String.format("%d", rideId);
                     try {
-                        query = String.format("cabId=%s&rideId=%s", 
-                            URLEncoder.encode(paramCabId, charset),
-                            URLEncoder.encode(paramrideId, charset)
-                        );
+                        query = String.format("cabId=%s&rideId=%s", URLEncoder.encode(paramCabId, charset),
+                                URLEncoder.encode(paramrideId, charset));
                     } catch (UnsupportedEncodingException e) {
                         System.out.println("ERROR: Unsupported encoding format!");
-                        return -1;
+                        return "-1";
                     }
 
                     try {
@@ -243,11 +239,11 @@ public class RideController {
                     } catch (Exception e) {
                         System.out.println(
                                 "ERROR: Some error occured while trying to send ride started request to cab service!");
-                        return -1;
+                        return "-1";
                     }
 
                     // update values of cab
-                   // Cab cab
+                    // Cab cab
                     cab.setRideId(rideId);
                     cab.location = sourceLoc;
                     cab.setState(CabState.GIVING_RIDE);
@@ -263,20 +259,22 @@ public class RideController {
                     custrepo.save(custData);
 
                     System.out.println("Sending true...");
-                    return rideId;
+                    String str=rideId+" "+cab.cabId+" "+fare;
+                    return str;
                 }
             }
             if (requestCount == 3 || !iterator.hasNext()) {
                 rideId--;
-                return -1;
+                return "-1";
             }
-          //  i++;
-            cab =iterator.next();
+            // i++;
+            cab = iterator.next();  
         }
-        return -1;
+        return "-1";
     }
 
     @RequestMapping("/getCabStatus")
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public String getCabStatus(@RequestParam int cabId) {
         return cabDataService.getCabStatus(cabId);
     }
