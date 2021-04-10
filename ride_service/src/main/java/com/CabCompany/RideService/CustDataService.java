@@ -12,13 +12,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class CustDataService {
 
-    private ArrayList<Customer> customers = new ArrayList<>();
+   // private ArrayList<Customer> customers = new ArrayList<>();
 
+    @Autowired
     CustRepo repo;
     
-    @Autowired
-    public CustDataService(CustRepo repo) {
-        this.repo=repo;
+
+
+    public void init(){
+
         ArrayList<Integer> custIds = new ArrayList<>();
 
         try {
@@ -44,31 +46,27 @@ public class CustDataService {
 
         for (int custId : custIds) {
             Customer customer=new Customer(custId);
-            customers.add(customer);
             repo.save(customer);
         }
 
     }
 
     public ArrayList<Customer> getAllCustomers() {
+        ArrayList<Customer> customers=new ArrayList<>();
+        repo.findAll().forEach(customers::add);
         return customers;
     }
 
-    public void displayCustomers() {
-        for (Customer cust : customers) {
-            System.out.println(cust.custId + " ");
-        }
-    }
 
-    public Customer getCustWithId(int id) {
-        return (customers.stream().filter(c -> (c.custId == id)).findFirst().get());
-    }
+
 
     public void reset() {
+        ArrayList<Customer> customers=getAllCustomers();
         for (Customer cust : customers) {
             cust.sourceLoc = 0;
             cust.rideId = 0;
-            cust.rideState = RideState.ENDED;
+            cust.rideState = RideState.ENDED.toString();
+            repo.save(cust);
         }
     }
 }

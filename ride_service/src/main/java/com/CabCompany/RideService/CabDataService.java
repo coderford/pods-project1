@@ -13,18 +13,20 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+@Component
 @Service
 public class CabDataService {
-    private ArrayList<Cab> cabs = new ArrayList<>();
-
-    
-    RideRepo repo;
     @Autowired
-    public CabDataService(RideRepo repo) {
-        this.repo=repo;
+    RideRepo repo;       
+   
+    public void init()
+    {
         ArrayList<Integer> cabIds = new ArrayList<>();
         try {
             File inputFile = new File("IDs.txt");
@@ -48,41 +50,30 @@ public class CabDataService {
         }
 
         
-
+            
             for (int cabId : cabIds) {
-                if(!repo.findById(cabId).get().equals(null))
-                {
-                    break;
-                }
                 Cab cab=new Cab(cabId);
-                cabs.add(cab);
                 repo.save(cab);
             }
         
-        
 
     }
 
-    public void displayCabs() {
-        for (Cab cab : cabs) {
-            System.out.println("cabId :" + cab.cabId + "  rideId:" + cab.rideId);
-        }
-    }
+    
 
     public ArrayList<Cab> getAllCabs() {
+        ArrayList<Cab> cabs=new ArrayList<>();
+        repo.findAll().forEach(cabs::add);
         return cabs;
     }
 
     public String getCabStatus(int cabId) {
         try {
-            Cab cab = cabs.stream().filter(c -> c.getId() == cabId).findFirst().get();
-            Cab cabInDB=repo.findById(cabId).get();
-           // String stateStr = cabInDB.state.toString().toLowerCase().replaceAll("_", "-");
-            String stateStr = cabInDB.state.toString();
-            //String stateString = cab.state.toString().toLowerCase().replaceAll("_", "-");
+            Cab cab=repo.findById(cabId).get();
+            String stateStr = cab.state.toString().toLowerCase().replaceAll("_", "-");
             if (cab.state.equals(CabState.GIVING_RIDE.toString())) {
                 return (stateStr + " " + cab.location + " " + cab.custId + " " + cab.destinationLoc);
-            } else if (!cabInDB.state.equals(CabState.SIGNED_OUT.toString())) {
+            } else if (!cab.state.equals(CabState.SIGNED_OUT.toString())) {
                 return (stateStr + " " + cab.location);
             }
             else return "signed-out -1";
@@ -92,16 +83,10 @@ public class CabDataService {
         }
     }
 
-    public Cab getCabWithId(int id) {
-        try {
-          //  return (cabs.stream().filter(c -> (c.cabId == id)).findFirst().get());
-            return repo.findById(id).get();
-        } catch (Exception E) {
-            return null;
-        }
-    }
+
 
     public void reset() {
+        ArrayList<Cab> cabs=getAllCabs();
         for (Cab cab : cabs) {
             // Send rideEnded request
             String rideEndedURL = "http://localhost:8080/rideEnded";
