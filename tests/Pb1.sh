@@ -30,7 +30,7 @@ else
 fi
 
 #customer 202 requests a ride
-rideId=$(curl -s "http://localhost:8081/requestRide?custId=202&sourceLoc=1&destinationLoc=11")
+rideId=$(curl -s "http://localhost:8081/requestRide?custId=202&sourceLoc=1&destinationLoc=11" | { read a b c; echo $a; })
 if [ "$rideId" != "-1" ];
 then
     echo "Ride by customer 202 started"
