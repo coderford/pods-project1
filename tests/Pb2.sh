@@ -41,7 +41,7 @@ fi
 
 
 #Step 4 : customer 201 requests a ride
-rideId=$(curl -s "http://localhost:8081/requestRide?custId=201&sourceLoc=110&destinationLoc=200")
+rideId=$(curl -s "http://localhost:8081/requestRide?custId=201&sourceLoc=110&destinationLoc=200"| { read a b c ; echo $a ; })
 if [ "$rideId" != "-1" ];
 then
     echo "Ride by customer 201 started"
@@ -65,9 +65,9 @@ fi
 resp=$(curl -s "http://localhost:8080/rideEnded?cabId=101&rideId=$rideId")
 if [ "$resp" = "true" ];
 then
-    echo $rideId1 " has ended"
+    echo $rideId " has ended"
 else
-    echo "Could not end" $rideId1
+    echo "Could not end" $rideId
     testPassed="no"
 fi
 

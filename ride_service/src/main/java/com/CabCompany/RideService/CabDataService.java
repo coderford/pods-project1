@@ -100,9 +100,13 @@ public class CabDataService {
 
 
     public void reset() {
+<<<<<<< HEAD
       //  init();
+=======
+>>>>>>> 80d466a098da27ac792a6dfcce88d68eb29a2611
         ArrayList<Cab> cabs=getAllCabs();
         for (Cab cab : cabs) {
+            System.out.println("Sending ride end request for cab "+cab.cabId+" and ride "+cab.rideId);
             // Send rideEnded request
             String rideEndedURL = "http://localhost:8080/rideEnded";
             String charset = "UTF-8";
@@ -145,6 +149,8 @@ public class CabDataService {
             } catch (Exception e) {
                 System.out.println("ERROR: Some error occured while trying to send sign-out request to cab service!"+e);
             }
+
+            /*
             System.out.println("Resetting values for cab " + cab.cabId);
             cab.numRides = 0;
             cab.state = CabState.SIGNED_OUT.toString();
@@ -154,6 +160,8 @@ public class CabDataService {
             cab.destinationLoc = -1;
             cab.custId = -1;
             repo.save(cab);
+            */
         }
+        init();
     }
 }

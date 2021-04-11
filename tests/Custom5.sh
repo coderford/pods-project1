@@ -19,7 +19,7 @@ else
 fi
 
 #customer 201 requests a ride that uses up all his balance
-rideId=$(curl -s "http://localhost:8081/requestRide?custId=201&sourceLoc=0&destinationLoc=1000")
+rideId=$(curl -s "http://localhost:8081/requestRide?custId=201&sourceLoc=0&destinationLoc=1000" | { read a b c; echo $a; })
 if [ "$rideId" != "-1" ];
 then
     echo "Ride by customer 201 started"
@@ -50,7 +50,7 @@ fi
 
 #Customer 201 tries to request another very short ride.
 #This should be picked by cab 102 since cab 101 is uninterested.
-rideId=$(curl -s "http://localhost:8081/requestRide?custId=201&sourceLoc=0&destinationLoc=1")
+rideId=$(curl -s "http://localhost:8081/requestRide?custId=201&sourceLoc=0&destinationLoc=1" | { read a b c; echo $a; })
 if [ "$rideId" != "-1" ];
 then
     echo "Second ride by customer 201 started"

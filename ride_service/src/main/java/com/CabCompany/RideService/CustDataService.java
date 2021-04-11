@@ -58,7 +58,12 @@ public class CustDataService {
     }
 
     public void reset() {
+<<<<<<< HEAD
         //init();
+=======
+        init();
+        /*
+>>>>>>> 80d466a098da27ac792a6dfcce88d68eb29a2611
         ArrayList<Customer> customers=getAllCustomers();
         for (Customer cust : customers) {
             cust.sourceLoc = 0;
@@ -66,5 +71,6 @@ public class CustDataService {
             cust.rideState = RideState.ENDED.toString();
             repo.save(cust);
         }
+        */
     }
 }
