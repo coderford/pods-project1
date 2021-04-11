@@ -93,6 +93,7 @@ public class RideController {
     }
 
     @RequestMapping("/cabSignsOut")
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public boolean cabsignsOut(@RequestParam int cabId) {
       //  Cab cab = cabrepo.findById(cabId).get();
         Cab cab = em.find(Cab.class, cabId, LockModeType.PESSIMISTIC_WRITE);
@@ -291,8 +292,6 @@ public class RideController {
 
     @RequestMapping("/reset")
     public void reset() {
-        cabDataService.init();
-        custDataService.init();
         System.out.println("Resetting everything...");
       //  Cab dummy=em.find(Cab.class, 555555,LockModeType.PESSIMISTIC_WRITE);
         cabDataService.reset();

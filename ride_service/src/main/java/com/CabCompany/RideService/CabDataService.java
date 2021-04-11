@@ -100,10 +100,6 @@ public class CabDataService {
 
 
     public void reset() {
-<<<<<<< HEAD
-      //  init();
-=======
->>>>>>> 80d466a098da27ac792a6dfcce88d68eb29a2611
         ArrayList<Cab> cabs=getAllCabs();
         for (Cab cab : cabs) {
             System.out.println("Sending ride end request for cab "+cab.cabId+" and ride "+cab.rideId);

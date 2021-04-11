@@ -107,6 +107,7 @@ public class Cab {
     }
 
     public boolean rideEnded(int rideId) {
+        System.out.println("Received ride-end request for cab "+this.id+" and ride "+rideId);
         if(this.state != CabState.GIVING_RIDE || this.rideId != rideId)
             return false;
 
