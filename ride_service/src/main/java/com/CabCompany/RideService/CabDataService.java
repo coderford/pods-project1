@@ -14,6 +14,9 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
+import javax.persistence.PersistenceContext;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,8 +26,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class CabDataService {
     @Autowired
-    RideRepo repo;       
-   
+    RideRepo repo;
+
+    @PersistenceContext       
+   private EntityManager em;
+
     public void init()
     {
         ArrayList<Integer> cabIds = new ArrayList<>();
@@ -55,8 +61,15 @@ public class CabDataService {
                 Cab cab=new Cab(cabId);
                 repo.save(cab);
             }
+            adddummy();
         
 
+    }
+
+    public void adddummy()
+    {
+        Cab cab=new Cab(555555);
+         repo.save(cab);
     }
 
     
@@ -69,7 +82,8 @@ public class CabDataService {
 
     public String getCabStatus(int cabId) {
         try {
-            Cab cab=repo.findById(cabId).get();
+            //Cab cab=repo.findById(cabId).get();
+            Cab cab=em.find(Cab.class, cabId, LockModeType.PESSIMISTIC_WRITE);
             String stateStr = cab.state.toString().toLowerCase().replaceAll("_", "-");
             if (cab.state.equals(CabState.GIVING_RIDE.toString())) {
                 return (stateStr + " " + cab.location + " " + cab.custId + " " + cab.destinationLoc);
@@ -86,7 +100,7 @@ public class CabDataService {
 
 
     public void reset() {
-        init();
+      //  init();
         ArrayList<Cab> cabs=getAllCabs();
         for (Cab cab : cabs) {
             // Send rideEnded request

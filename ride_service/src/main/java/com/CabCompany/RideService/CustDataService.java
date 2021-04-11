@@ -58,7 +58,7 @@ public class CustDataService {
     }
 
     public void reset() {
-        init();
+        //init();
         ArrayList<Customer> customers=getAllCustomers();
         for (Customer cust : customers) {
             cust.sourceLoc = 0;

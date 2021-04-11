@@ -12,6 +12,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Scanner;
 
+import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
+import javax.persistence.PersistenceContext;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +37,9 @@ public class RideController {
     @Autowired
     private CustDataService custDataService;
 
-    
+    @PersistenceContext
+    EntityManager em;
+
     @RequestMapping("/cabs")
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public ArrayList<Cab> Displaycabs() {
@@ -46,9 +52,11 @@ public class RideController {
     }
 
     @RequestMapping("/rideEnded")
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public boolean rideEnded(@RequestParam int cabId, @RequestParam int rideId) {
         // Cab cab = cabDataService.getCabWithId(cabId);
-        Cab cabInDB = cabrepo.findById(cabId).get();
+        // Cab cabInDB = cabrepo.findById(cabId).get();
+        Cab cabInDB = em.find(Cab.class, cabId, LockModeType.PESSIMISTIC_WRITE);
         Customer custInDB = custrepo.findById(cabInDB.custId).get();
         // Customer cust=custDataService.getCustWithId(cabInDB.custId);
         if (cabInDB.state.equals(CabState.GIVING_RIDE.toString()) && cabInDB.rideId == rideId) {
@@ -61,6 +69,7 @@ public class RideController {
             cabrepo.save(cabInDB);
             custrepo.save(custInDB);
             return true;
+
         }
 
         return false;
@@ -70,14 +79,13 @@ public class RideController {
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public boolean cabSignsIn(@RequestParam int cabId, @RequestParam int initialPos) {
         try {
-            Cab cabInDB = cabrepo.findById(cabId).get();
+
+            // Cab cabInDB = cabrepo.findById(cabId).get();
+            Cab cabInDB = em.find(Cab.class, cabId, LockModeType.PESSIMISTIC_WRITE);
             cabInDB.state = CabState.AVAILABLE.toString();
             cabInDB.location = initialPos;
             cabrepo.save(cabInDB);
-            /*
-             * Cab cab = cabDataService.getCabWithId(cabId); cab.location = initialPos;
-             * cab.setState(CabState.AVAILABLE);
-             */
+
             return true;
         } catch (Exception e) {
             return false;
@@ -86,7 +94,8 @@ public class RideController {
 
     @RequestMapping("/cabSignsOut")
     public boolean cabsignsOut(@RequestParam int cabId) {
-        Cab cab = cabrepo.findById(cabId).get();
+      //  Cab cab = cabrepo.findById(cabId).get();
+        Cab cab = em.find(Cab.class, cabId, LockModeType.PESSIMISTIC_WRITE);
         cab.setState(CabState.SIGNED_OUT);
         cab.location = -1;
         cabrepo.save(cab);
@@ -101,7 +110,7 @@ public class RideController {
         int requestCount = 0;
 
         // cab selection mechanism
-        int i = 0;
+        Cab dummy=em.find(Cab.class, 555555,LockModeType.PESSIMISTIC_WRITE);
         Iterable<Cab> cabs = cabrepo.findAll();
         Customer custData;
 
@@ -160,7 +169,7 @@ public class RideController {
                     fare = 10 * (Math.abs(cab.location - sourceLoc) + Math.abs(sourceLoc - destinationLoc));
                     // deduct fare from wallet
                     System.out.println("deducting " + fare + " from wallet");
-                    String deductAmountURL = "http://10.11.0.3:8082/deductAmount";
+                    String deductAmountURL = "http://localhost:8082/deductAmount";
                     String paramcustId = String.format("%d", custId);
                     String paramfare = String.format("%d", fare);
                     try {
@@ -260,7 +269,7 @@ public class RideController {
                     custrepo.save(custData);
 
                     System.out.println("Sending true...");
-                    String str=rideId+" "+cab.cabId+" "+fare;
+                    String str = rideId + " " + cab.cabId + " " + fare;
                     return str;
                 }
             }
@@ -269,7 +278,7 @@ public class RideController {
                 return "-1";
             }
             // i++;
-            cab = iterator.next();  
+            cab = iterator.next();
         }
         return "-1";
     }
@@ -282,7 +291,10 @@ public class RideController {
 
     @RequestMapping("/reset")
     public void reset() {
+        cabDataService.init();
+        custDataService.init();
         System.out.println("Resetting everything...");
+      //  Cab dummy=em.find(Cab.class, 555555,LockModeType.PESSIMISTIC_WRITE);
         cabDataService.reset();
         custDataService.reset();
     }
