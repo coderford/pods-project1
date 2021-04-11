@@ -160,7 +160,7 @@ public class RideController {
                     fare = 10 * (Math.abs(cab.location - sourceLoc) + Math.abs(sourceLoc - destinationLoc));
                     // deduct fare from wallet
                     System.out.println("deducting " + fare + " from wallet");
-                    String deductAmountURL = "http://10.11.0.3:8082/deductAmount";
+                    String deductAmountURL = "http://localhost:8082/deductAmount";
                     String paramcustId = String.format("%d", custId);
                     String paramfare = String.format("%d", fare);
                     try {

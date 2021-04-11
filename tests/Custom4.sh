@@ -20,7 +20,7 @@ else
 fi
 
 #customer 201 requests a ride
-rideId=$(curl -s "http://localhost:8081/requestRide?custId=201&sourceLoc=2&destinationLoc=10")
+rideId=$(curl -s "http://localhost:8081/requestRide?custId=201&sourceLoc=2&destinationLoc=10" | { read a b c; echo $a; })
 if [ "$rideId" != "-1" ];
 then
     echo "Ride by customer 201 started"
@@ -40,7 +40,7 @@ else
 fi
 
 #customer 202 requests a ride, but the cab is not interested
-rideId=$(curl -s "http://localhost:8081/requestRide?custId=202&sourceLoc=20&destinationLoc=5")
+rideId=$(curl -s "http://localhost:8081/requestRide?custId=202&sourceLoc=20&destinationLoc=5" | { read a b c; echo $a; })
 if [ "$rideId" != "-1" ];
 then
     echo "Ride by customer 202 started even though cab is not interested"
@@ -51,7 +51,7 @@ fi
 
 #customer 202 requests a ride again, but doesn't have enough balance,
 #so his ride is cancelled
-rideId=$(curl -s "http://localhost:8081/requestRide?custId=202&sourceLoc=20&destinationLoc=50000")
+rideId=$(curl -s "http://localhost:8081/requestRide?custId=202&sourceLoc=20&destinationLoc=50000" | { read a b c; echo $a; })
 if [ "$rideId" != "-1" ];
 then
     echo "Extreme distance ride by customer 202 started"
@@ -61,7 +61,7 @@ else
 fi
 
 #customer 203 requests a ride, but the cab is not interested
-rideId=$(curl -s "http://localhost:8081/requestRide?custId=203&sourceLoc=1&destinationLoc=25")
+rideId=$(curl -s "http://localhost:8081/requestRide?custId=203&sourceLoc=1&destinationLoc=25" | { read a b c; echo $a; })
 if [ "$rideId" != "-1" ];
 then
     echo "Ride by customer 202 started even though cab is not interested"
@@ -71,7 +71,7 @@ else
 fi
 
 #customer 203 requests a ride again, and this time the cab is interested
-rideId=$(curl -s "http://localhost:8081/requestRide?custId=203&sourceLoc=1&destinationLoc=25")
+rideId=$(curl -s "http://localhost:8081/requestRide?custId=203&sourceLoc=1&destinationLoc=25" | { read a b c; echo $a; })
 if [ "$rideId" != "-1" ];
 then
     echo "Ride by customer 203 started"

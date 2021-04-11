@@ -19,7 +19,7 @@ else
 fi
 
 #customer 201 requests a ride
-rideId=$(curl -s "http://localhost:8081/requestRide?custId=201&sourceLoc=2&destinationLoc=10")
+rideId=$(curl -s "http://localhost:8081/requestRide?custId=201&sourceLoc=2&destinationLoc=10" | { read a b c; echo $a; })
 if [ "$rideId" != "-1" ];
 then
     echo "Ride by customer 201 started"
@@ -39,7 +39,7 @@ else
 fi
 
 #customer 202 requests a ride, but the cab is not interested
-rideId=$(curl -s "http://localhost:8081/requestRide?custId=202&sourceLoc=20&destinationLoc=5")
+rideId=$(curl -s "http://localhost:8081/requestRide?custId=202&sourceLoc=20&destinationLoc=5" | { read a b c; echo $a; })
 if [ "$rideId" != "-1" ];
 then
     echo "Ride by customer 202 started even though cab is not interested"
@@ -49,7 +49,7 @@ else
 fi
 
 #customer 202 requests a ride again, and this time it is accepted
-rideId=$(curl -s "http://localhost:8081/requestRide?custId=202&sourceLoc=20&destinationLoc=5")
+rideId=$(curl -s "http://localhost:8081/requestRide?custId=202&sourceLoc=20&destinationLoc=5" | { read a b c; echo $a; })
 if [ "$rideId" != "-1" ];
 then
     echo "Ride by customer 202 started"
