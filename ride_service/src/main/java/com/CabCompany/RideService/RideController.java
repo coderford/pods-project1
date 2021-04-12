@@ -9,7 +9,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Scanner;
 
 import javax.persistence.EntityManager;
@@ -24,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RestController
 public class RideController {
 
-    int rideId = 0;
     @Autowired
     private CabDataService cabDataService;
 
@@ -33,6 +34,9 @@ public class RideController {
 
     @Autowired
     CustRepo custrepo;
+
+    @Autowired
+    NextRideIdRepo nextRideIdRepo;
 
     @Autowired
     private CustDataService custDataService;
@@ -69,7 +73,6 @@ public class RideController {
             cabrepo.save(cabInDB);
             custrepo.save(custInDB);
             return true;
-
         }
 
         return false;
@@ -105,13 +108,23 @@ public class RideController {
 
     @RequestMapping("/requestRide")
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public String requestRide(@RequestParam int custId, @RequestParam int sourceLoc, @RequestParam int destinationLoc) {
-        rideId++;
+    public String requestRide(
+        @RequestParam int custId, 
+        @RequestParam int sourceLoc, 
+        @RequestParam int destinationLoc
+    ) {
+        String requestRideURL  = "http://localhost:8080/requestRide";
+        String deductAmountURL = "http://localhost:8082/deductAmount";
+        String rideCancelURL   = "http://localhost:8080/rideCanceled";
+        String rideStartedURL  = "http://localhost:8080/rideStarted";
+
+        if(sourceLoc < 0 || destinationLoc < 0) return "-1";
+
+        int rideId = nextRideIdRepo.findById(0).get().getRideId();
         int fare = 0;
         int requestCount = 0;
 
         // cab selection mechanism
-        Cab dummy=em.find(Cab.class, 555555,LockModeType.PESSIMISTIC_WRITE);
         Iterable<Cab> cabs = cabrepo.findAll();
         Customer custData;
 
@@ -120,141 +133,68 @@ public class RideController {
         } catch (Exception e) {
             return "-1";
         }
-        Iterator<Cab> iterator = cabs.iterator();
-        Cab cab = iterator.next();
 
-        while (iterator.hasNext() || requestCount <= 3) {
-            // Send requset to available cabs
+        // Send request to available cabs
+        Iterator<Cab> iterator = cabs.iterator();
+        while (iterator.hasNext() && requestCount < 3) {
+            Cab cab = iterator.next();
+
             System.out.println("Sending request to cab : " + cab.cabId);
             if (cab.state.equals(CabState.AVAILABLE.toString())) {
                 System.out.println("Cab " + cab.cabId + " is available. Sending request...");
                 requestCount++;
 
-                String requestRideURL = "http://localhost:8080/requestRide";
-                String charset = "UTF-8";
-                String paramCabId = String.format("%d", cab.cabId);
-                String paramrideId = String.format("%d", rideId);
-                String paramsourcLoc = String.format("%d", sourceLoc);
-                String paramdestLoc = String.format("%d", destinationLoc);
-                String query;
-                try {
-                    query = String.format("cabId=%s&rideId=%s&sourceLoc=%s&destinationLoc=%s",
-                            URLEncoder.encode(paramCabId, charset), URLEncoder.encode(paramrideId, charset),
-                            URLEncoder.encode(paramsourcLoc, charset), URLEncoder.encode(paramdestLoc, charset));
-                } catch (UnsupportedEncodingException e) {
-                    System.out.println("ERROR: Unsupported encoding format!");
-                    rideId--;
-                    return "-1";
-                }
-
-                URLConnection connection;
-                String cabReqResponse;
-                try {
-                    connection = new URL(requestRideURL + "?" + query).openConnection();
-                    connection.setRequestProperty("Accept-Charset", charset);
-                    InputStream response = connection.getInputStream();
-                    Scanner scanner = new Scanner(response);
-                    cabReqResponse = scanner.useDelimiter("\\A").next();
-                    System.out.println("Cab response: " + cabReqResponse);
-                    scanner.close();
-                } catch (Exception e) {
-                    System.out.println("ERROR: Some error occured while trying to send ride request to cab service!");
-                    rideId--;
-                    return "-1";
-                }
+                String cabReqResponse = getHTTPResponse(
+                    requestRideURL, 
+                    Arrays.asList("cabId", "rideId", "sourceLoc", "destinationLoc"), 
+                    Arrays.asList(
+                            String.format("%d", cab.cabId), 
+                            String.format("%d", rideId),
+                            String.format("%d", sourceLoc),
+                            String.format("%d", destinationLoc)
+                    )
+                );
 
                 if (cabReqResponse.equals("true")) {
                     // cab accepted request
                     System.out.println("Cab " + cab.cabId + " accepted");
+
                     // deducting amount from wallet
                     fare = 10 * (Math.abs(cab.location - sourceLoc) + Math.abs(sourceLoc - destinationLoc));
-                    // deduct fare from wallet
-                    System.out.println("deducting " + fare + " from wallet");
-                    String deductAmountURL = "http://localhost:8082/deductAmount";
-                    String paramcustId = String.format("%d", custId);
-                    String paramfare = String.format("%d", fare);
-                    try {
-                        query = String.format("custId=%s&amount=%s", URLEncoder.encode(paramcustId, charset),
-                                URLEncoder.encode(paramfare, charset));
-                    } catch (UnsupportedEncodingException e) {
-                        System.out.println("ERROR: Unsupported encoding format!");
-                        rideId--;
+
+                    String amtDeductResponse = getHTTPResponse(
+                        deductAmountURL, 
+                        Arrays.asList("custId", "amount"), 
+                        Arrays.asList(
+                            String.format("%d", custId),
+                            String.format("%d", fare)
+                        )
+                    );
+
+                    if (!amtDeductResponse.equals("true")) { 
+                        // Amount deduction failed. Cancel the ride
+                        getHTTPResponse(
+                            rideCancelURL, 
+                            Arrays.asList("cabId", "rideId"), 
+                            Arrays.asList(
+                                String.format("%d", cab.cabId),
+                                String.format("%d", rideId)
+                            )
+                        );
                         return "-1";
                     }
 
-                    String amtDeductResponse;
-                    try {
-                        connection = new URL(deductAmountURL + "?" + query).openConnection();
-                        connection.setRequestProperty("Accept-Charset", charset);
-                        InputStream response = connection.getInputStream();
-                        Scanner scanner = new Scanner(response);
-                        amtDeductResponse = scanner.useDelimiter("\\A").next();
-                        scanner.close();
-                    } catch (Exception e) {
-                        System.out.println(
-                                "ERROR: Some error occured while trying to send deduct Amount request to wallet service!");
-                        rideId--;
-                        return "-1";
-                    }
-
-                    if (amtDeductResponse.equals("false")) // Amount deduction failed. Cancel the ride
-                    {
-                        String rideCancelURL = "http://localhost:8080/rideCanceled";
-                        paramCabId = String.format("%d", cab.cabId);
-                        paramrideId = String.format("%d", rideId);
-                        try {
-                            query = String.format("cabId=%s&rideId=%s", URLEncoder.encode(paramCabId, charset),
-                                    URLEncoder.encode(paramrideId, charset));
-                        } catch (UnsupportedEncodingException e) {
-                            System.out.println("ERROR: Unsupported encoding format!");
-                            rideId--;
-                            return "-1";
-                        }
-
-                        try {
-                            connection = new URL(rideCancelURL + "?" + query).openConnection();
-                            connection.setRequestProperty("Accept-Charset", charset);
-                            InputStream response = connection.getInputStream();
-                            Scanner scanner = new Scanner(response);
-                            cabReqResponse = scanner.useDelimiter("\\A").next();
-                            scanner.close();
-                        } catch (Exception e) {
-                            System.out.println(
-                                    "ERROR: Some error occured while trying to send cancel request to cab service!");
-                            e.printStackTrace();
-                            rideId--;
-                            return "-1";
-                        }
-                        rideId--;
-                        return "-1";
-                    }
-
-                    String rideStartedURL = "http://localhost:8080/rideStarted";
-                    paramCabId = String.format("%d", cab.cabId);
-                    paramrideId = String.format("%d", rideId);
-                    try {
-                        query = String.format("cabId=%s&rideId=%s", URLEncoder.encode(paramCabId, charset),
-                                URLEncoder.encode(paramrideId, charset));
-                    } catch (UnsupportedEncodingException e) {
-                        System.out.println("ERROR: Unsupported encoding format!");
-                        return "-1";
-                    }
-
-                    try {
-                        connection = new URL(rideStartedURL + "?" + query).openConnection();
-                        connection.setRequestProperty("Accept-Charset", charset);
-                        InputStream response = connection.getInputStream();
-                        Scanner scanner = new Scanner(response);
-                        cabReqResponse = scanner.useDelimiter("\\A").next();
-                        scanner.close();
-                    } catch (Exception e) {
-                        System.out.println(
-                                "ERROR: Some error occured while trying to send ride started request to cab service!");
-                        return "-1";
-                    }
+                    // Amount deduction succeeded. Send ride started request
+                    getHTTPResponse(
+                        rideStartedURL, 
+                        Arrays.asList("cabId", "rideId"), 
+                        Arrays.asList(
+                            String.format("%d", cab.cabId),
+                            String.format("%d", rideId)
+                        )
+                    );
 
                     // update values of cab
-                    // Cab cab
                     cab.setRideId(rideId);
                     cab.location = sourceLoc;
                     cab.setState(CabState.GIVING_RIDE);
@@ -269,17 +209,14 @@ public class RideController {
                     custData.setRideState(RideState.STARTED);
                     custrepo.save(custData);
 
+                    // update next ride id
+                    nextRideIdRepo.save(new NextRideId(rideId + 1));
+
                     System.out.println("Sending true...");
                     String str = rideId + " " + cab.cabId + " " + fare;
                     return str;
                 }
             }
-            if (requestCount == 3 || !iterator.hasNext()) {
-                rideId--;
-                return "-1";
-            }
-            // i++;
-            cab = iterator.next();
         }
         return "-1";
     }
@@ -291,10 +228,49 @@ public class RideController {
     }
 
     @RequestMapping("/reset")
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public void reset() {
         System.out.println("Resetting everything...");
       //  Cab dummy=em.find(Cab.class, 555555,LockModeType.PESSIMISTIC_WRITE);
+        nextRideIdRepo.save(new NextRideId(1));
         cabDataService.reset();
         custDataService.reset();
+    }
+
+    private String getHTTPResponse(String url, List<String> paramNames, List<String> paramVals) {
+        // Encode parameters
+        try {
+            for (int i = 0; i < paramNames.size(); i++) {
+                paramVals.set(i, URLEncoder.encode(paramVals.get(i), "UTF-8"));
+            }
+        } catch (UnsupportedEncodingException e) {
+            System.out.println("ERROR: Unsupported encoding format!");
+            return "<ERROR>";
+        }
+
+        // Build query
+        String query = "";
+        for(int i = 0; i < paramNames.size(); i++) {
+            query += paramNames.get(i)+"="+paramVals.get(i);
+            if(i < paramNames.size() - 1) query += "&";
+        }
+
+        // Get response
+        String responseString = "<ERROR>";
+
+        URLConnection connection;
+        try {
+            connection = new URL(url + "?" + query).openConnection();
+            connection.setRequestProperty("Accept-Charset", "UTF-8");
+            InputStream response = connection.getInputStream();
+            Scanner scanner = new Scanner(response);
+            responseString = scanner.useDelimiter("\\A").next();
+            scanner.close();
+        } catch (Exception e) {
+            System.out.println("ERROR: GET from URL "+url+" failed");
+            return "<ERROR>";
+        }
+
+        return responseString;
     }
 }
