@@ -83,7 +83,7 @@ public class CabDataService {
             System.out.println("Sending ride end request for cab "+cab.cabId+" and ride "+cab.rideId);
 
             // Send rideEnded request
-            String rideEndedURL = "http://localhost:8080/rideEnded";
+            String rideEndedURL = "http://cab-service:8080/rideEnded";
             RequestSender.getHTTPResponse(
                 rideEndedURL, 
                 Arrays.asList("cabId", "rideId"), 
@@ -94,7 +94,7 @@ public class CabDataService {
             );
 
             // Send signOut request
-            String signOutURL = "http://localhost:8080/signOut";
+            String signOutURL = "http://cab-service:8080/signOut";
             RequestSender.getHTTPResponse(
                 signOutURL, 
                 Arrays.asList("cabId"),

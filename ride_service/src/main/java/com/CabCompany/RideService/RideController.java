@@ -105,10 +105,10 @@ public class RideController {
         @RequestParam int sourceLoc, 
         @RequestParam int destinationLoc
     ) {
-        String requestRideURL  = "http://localhost:8080/requestRide";
-        String deductAmountURL = "http://localhost:8082/deductAmount";
-        String rideCancelURL   = "http://localhost:8080/rideCanceled";
-        String rideStartedURL  = "http://localhost:8080/rideStarted";
+        String requestRideURL  = "http://cab-service:8080/requestRide";
+        String deductAmountURL = "http://wallet-service:8082/deductAmount";
+        String rideCancelURL   = "http://cab-service:8080/rideCanceled";
+        String rideStartedURL  = "http://cab-service:8080/rideStarted";
 
         if(sourceLoc < 0 || destinationLoc < 0) return "-1";
 

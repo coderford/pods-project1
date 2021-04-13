@@ -106,7 +106,7 @@ public class Cab {
         if(this.state != CabState.GIVING_RIDE || this.rideId != rideId)
             return false;
 
-        String rideEndedURL = "http://localhost:8081/rideEnded";
+        String rideEndedURL = "http://ride-service:8081/rideEnded";
         String response = RequestSender.getHTTPResponse(
             rideEndedURL, 
             Arrays.asList("cabId", "rideId"), 
@@ -155,7 +155,7 @@ public class Cab {
     }
 
     public boolean sendSignInRequest(int id, int initialPos) {
-        String signInURL = "http://localhost:8081/cabSignsIn";
+        String signInURL = "http://ride-service:8081/cabSignsIn";
         String response = RequestSender.getHTTPResponse(
             signInURL, 
             Arrays.asList("cabId", "initialPos"),
@@ -170,7 +170,7 @@ public class Cab {
     }
     
     public boolean sendSignOutRequest(int id) {
-        String signOutURL = "http://localhost:8081/cabSignsOut";
+        String signOutURL = "http://ride-service:8081/cabSignsOut";
         String response = RequestSender.getHTTPResponse(
             signOutURL, 
             Arrays.asList("cabId"),
