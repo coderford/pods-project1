@@ -3,16 +3,9 @@ package com.CabCompany.RideService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Scanner;
 
 import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
@@ -58,7 +51,6 @@ public class RideController {
     @RequestMapping("/rideEnded")
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public boolean rideEnded(@RequestParam int cabId, @RequestParam int rideId) {
-        // Cab cab = cabDataService.getCabWithId(cabId);
         // Cab cabInDB = cabrepo.findById(cabId).get();
         Cab cabInDB = em.find(Cab.class, cabId, LockModeType.PESSIMISTIC_WRITE);
         Customer custInDB = custrepo.findById(cabInDB.custId).get();
@@ -82,7 +74,6 @@ public class RideController {
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public boolean cabSignsIn(@RequestParam int cabId, @RequestParam int initialPos) {
         try {
-
             // Cab cabInDB = cabrepo.findById(cabId).get();
             Cab cabInDB = em.find(Cab.class, cabId, LockModeType.PESSIMISTIC_WRITE);
             cabInDB.state = CabState.AVAILABLE.toString();
@@ -98,7 +89,7 @@ public class RideController {
     @RequestMapping("/cabSignsOut")
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public boolean cabsignsOut(@RequestParam int cabId) {
-      //  Cab cab = cabrepo.findById(cabId).get();
+        // Cab cab = cabrepo.findById(cabId).get();
         Cab cab = em.find(Cab.class, cabId, LockModeType.PESSIMISTIC_WRITE);
         cab.setState(CabState.SIGNED_OUT);
         cab.location = -1;
@@ -144,7 +135,7 @@ public class RideController {
                 System.out.println("Cab " + cab.cabId + " is available. Sending request...");
                 requestCount++;
 
-                String cabReqResponse = getHTTPResponse(
+                String cabReqResponse = RequestSender.getHTTPResponse(
                     requestRideURL, 
                     Arrays.asList("cabId", "rideId", "sourceLoc", "destinationLoc"), 
                     Arrays.asList(
@@ -162,7 +153,7 @@ public class RideController {
                     // deducting amount from wallet
                     fare = 10 * (Math.abs(cab.location - sourceLoc) + Math.abs(sourceLoc - destinationLoc));
 
-                    String amtDeductResponse = getHTTPResponse(
+                    String amtDeductResponse = RequestSender.getHTTPResponse(
                         deductAmountURL, 
                         Arrays.asList("custId", "amount"), 
                         Arrays.asList(
@@ -173,7 +164,7 @@ public class RideController {
 
                     if (!amtDeductResponse.equals("true")) { 
                         // Amount deduction failed. Cancel the ride
-                        getHTTPResponse(
+                        RequestSender.getHTTPResponse(
                             rideCancelURL, 
                             Arrays.asList("cabId", "rideId"), 
                             Arrays.asList(
@@ -185,7 +176,7 @@ public class RideController {
                     }
 
                     // Amount deduction succeeded. Send ride started request
-                    getHTTPResponse(
+                    RequestSender.getHTTPResponse(
                         rideStartedURL, 
                         Arrays.asList("cabId", "rideId"), 
                         Arrays.asList(
@@ -231,46 +222,9 @@ public class RideController {
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void reset() {
         System.out.println("Resetting everything...");
-      //  Cab dummy=em.find(Cab.class, 555555,LockModeType.PESSIMISTIC_WRITE);
         nextRideIdRepo.save(new NextRideId(1));
         cabDataService.reset();
         custDataService.reset();
     }
 
-    private String getHTTPResponse(String url, List<String> paramNames, List<String> paramVals) {
-        // Encode parameters
-        try {
-            for (int i = 0; i < paramNames.size(); i++) {
-                paramVals.set(i, URLEncoder.encode(paramVals.get(i), "UTF-8"));
-            }
-        } catch (UnsupportedEncodingException e) {
-            System.out.println("ERROR: Unsupported encoding format!");
-            return "<ERROR>";
-        }
-
-        // Build query
-        String query = "";
-        for(int i = 0; i < paramNames.size(); i++) {
-            query += paramNames.get(i)+"="+paramVals.get(i);
-            if(i < paramNames.size() - 1) query += "&";
-        }
-
-        // Get response
-        String responseString = "<ERROR>";
-
-        URLConnection connection;
-        try {
-            connection = new URL(url + "?" + query).openConnection();
-            connection.setRequestProperty("Accept-Charset", "UTF-8");
-            InputStream response = connection.getInputStream();
-            Scanner scanner = new Scanner(response);
-            responseString = scanner.useDelimiter("\\A").next();
-            scanner.close();
-        } catch (Exception e) {
-            System.out.println("ERROR: GET from URL "+url+" failed");
-            return "<ERROR>";
-        }
-
-        return responseString;
-    }
 }

@@ -4,7 +4,7 @@ curl -s http://localhost:8082/reset
 
 # Run two test scripts in parellel
 
-bash sh1 & bash sh2
+bash sh1 & bash sh2 &
 
 # sh1 creates the output file sh1out, which contains fares
 # of all rides given in sh1. Similarly, sh2out.
