@@ -54,6 +54,7 @@ public class RideController {
         // Cab cabInDB = cabrepo.findById(cabId).get();
         Cab cabInDB = em.find(Cab.class, cabId, LockModeType.PESSIMISTIC_WRITE);
         Customer custInDB = custrepo.findById(cabInDB.custId).get();
+
         // Customer cust=custDataService.getCustWithId(cabInDB.custId);
         if (cabInDB.state.equals(CabState.GIVING_RIDE.toString()) && cabInDB.rideId == rideId) {
             cabInDB.location = cabInDB.destinationLoc;
@@ -130,9 +131,8 @@ public class RideController {
         while (iterator.hasNext() && requestCount < 3) {
             Cab cab = iterator.next();
 
-            System.out.println("Sending request to cab : " + cab.cabId);
             if (cab.state.equals(CabState.AVAILABLE.toString())) {
-                System.out.println("Cab " + cab.cabId + " is available. Sending request...");
+                System.out.println("Cust "+custId+": Cab " + cab.cabId + " is available. Sending request...");
                 requestCount++;
 
                 String cabReqResponse = RequestSender.getHTTPResponse(
@@ -148,7 +148,7 @@ public class RideController {
 
                 if (cabReqResponse.equals("true")) {
                     // cab accepted request
-                    System.out.println("Cab " + cab.cabId + " accepted");
+                    System.out.println("Cust "+custId+": Cab " + cab.cabId + " accepted");
 
                     // deducting amount from wallet
                     fare = 10 * (Math.abs(cab.location - sourceLoc) + Math.abs(sourceLoc - destinationLoc));
@@ -203,7 +203,8 @@ public class RideController {
                     // update next ride id
                     nextRideIdRepo.save(new NextRideId(rideId + 1));
 
-                    System.out.println("Sending true...");
+                    System.out.println("Cust "+custId+": Assigned ride ID "+rideId);
+                    System.out.println("Cust "+custId+": Sending true...");
                     String str = rideId + " " + cab.cabId + " " + fare;
                     return str;
                 }
