@@ -11,6 +11,8 @@ public class WalletDataService {
     private ArrayList<Wallet> wallets;
 
     public WalletDataService() {
+        //Initialize Wallet from IDs.txt File
+
         wallets = new ArrayList<>();
         ArrayList<Integer> custIds = new ArrayList<>();
         int initBalance = 0;
@@ -51,6 +53,7 @@ public class WalletDataService {
     }
 
     public Wallet getWalletWithCustId(int custId) {
+        //Get wwallet information with corresponding customer Id
         return wallets.stream().filter(w -> (w.getCustId() == custId)).findFirst().get();
     }
 

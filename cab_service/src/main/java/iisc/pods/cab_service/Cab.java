@@ -57,7 +57,8 @@ public class Cab {
     }
 
     public synchronized boolean requestRide(int rideId, int sourceLoc, int destinationLoc) {
-        System.out.println("Recieved request for rideId: "+rideId+" source: "+sourceLoc+" dest: "+destinationLoc);
+        //Ride request received for cab 
+        System.out.println("Received request for rideId: "+rideId+" source: "+sourceLoc+" dest: "+destinationLoc);
 
         if(interested) {
             interested = false;
@@ -83,7 +84,9 @@ public class Cab {
     }
 
     public boolean rideStarted(int rideId) {
-        if(state != CabState.COMMITTED) return false;
+        if(state != CabState.COMMITTED) return false; 
+
+        //Ride started successfully
 
         state = CabState.GIVING_RIDE;
         location = sourceLoc;
@@ -92,7 +95,9 @@ public class Cab {
     }
 
     public boolean rideCanceled(int rideId) {
-        if(this.state != CabState.COMMITTED || this.rideId != rideId)
+
+        //Ride cancel request Received , if ride is commited cancel the ride  
+        if(this.state != CabState.COMMITTED || this.rideId != rideId) 
             return false;
         this.state = CabState.AVAILABLE;
         this.rideId = -1;
@@ -106,6 +111,8 @@ public class Cab {
         if(this.state != CabState.GIVING_RIDE || this.rideId != rideId)
             return false;
 
+            //Ride completed send rideEnded request to Ride-service
+
         String rideEndedURL = "http://ride-service:8081/rideEnded";
         String response = RequestSender.getHTTPResponse(
             rideEndedURL, 
@@ -116,7 +123,9 @@ public class Cab {
             )
         );
 
-        if(!response.equals("true")) return false;
+        if(!response.equals("true")) return false; // Ride End request cannot be satisfied 
+
+        // Ride successfully Ended 
 
         this.state = CabState.AVAILABLE;
         this.rideId = -1;
@@ -128,6 +137,7 @@ public class Cab {
     }
 
     public boolean signIn(int initialPos) {
+        //signIn request received , signIn only if cab is in SIGNED_OUT state
         boolean signInAllowed = (state == CabState.SIGNED_OUT && initialPos >= 0);
 
         if(signInAllowed && sendSignInRequest(id, initialPos)) {
@@ -155,6 +165,7 @@ public class Cab {
     }
 
     public boolean sendSignInRequest(int id, int initialPos) {
+        //Send Cab SignIn request to Ride-Service
         String signInURL = "http://ride-service:8081/cabSignsIn";
         String response = RequestSender.getHTTPResponse(
             signInURL, 
@@ -170,6 +181,7 @@ public class Cab {
     }
     
     public boolean sendSignOutRequest(int id) {
+        //Send Cab SignOut request to Ride-Service
         String signOutURL = "http://ride-service:8081/cabSignsOut";
         String response = RequestSender.getHTTPResponse(
             signOutURL, 

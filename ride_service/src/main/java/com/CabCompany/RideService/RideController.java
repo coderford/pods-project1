@@ -51,11 +51,12 @@ public class RideController {
     @RequestMapping("/rideEnded")
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public boolean rideEnded(@RequestParam int cabId, @RequestParam int rideId) {
-        // Cab cabInDB = cabrepo.findById(cabId).get();
+        //Acquire Lock on Cab Table
         Cab cabInDB = em.find(Cab.class, cabId, LockModeType.PESSIMISTIC_WRITE);
         Customer custInDB = custrepo.findById(cabInDB.custId).get();
 
-        // Customer cust=custDataService.getCustWithId(cabInDB.custId);
+     
+        //End Ride if Cab is in GIVING_RIDE state and given rideId is valid 
         if (cabInDB.state.equals(CabState.GIVING_RIDE.toString()) && cabInDB.rideId == rideId) {
             cabInDB.location = cabInDB.destinationLoc;
             cabInDB.rideId = 0;
@@ -75,7 +76,7 @@ public class RideController {
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public boolean cabSignsIn(@RequestParam int cabId, @RequestParam int initialPos) {
         try {
-            // Cab cabInDB = cabrepo.findById(cabId).get();
+             //Acquire Lock on Cab Table
             Cab cabInDB = em.find(Cab.class, cabId, LockModeType.PESSIMISTIC_WRITE);
             cabInDB.state = CabState.AVAILABLE.toString();
             cabInDB.location = initialPos;
@@ -185,7 +186,7 @@ public class RideController {
                         )
                     );
 
-                    // update values of cab
+                    // update databse entries of cab
                     cab.setRideId(rideId);
                     cab.location = sourceLoc;
                     cab.setState(CabState.GIVING_RIDE);
@@ -195,7 +196,7 @@ public class RideController {
                     cab.numRides += 1;
                     cabrepo.save(cab);
 
-                    // update values of customer
+                    // update database entries of customer
                     custData.setRideId(rideId);
                     custData.setRideState(RideState.STARTED);
                     custrepo.save(custData);
@@ -216,12 +217,14 @@ public class RideController {
     @RequestMapping("/getCabStatus")
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public String getCabStatus(@RequestParam int cabId) {
+        //Call get cabstatus fucntion
         return cabDataService.getCabStatus(cabId);
     }
 
     @RequestMapping("/reset")
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void reset() {
+        //Reset Database 
         System.out.println("Resetting everything...");
         nextRideIdRepo.save(new NextRideId(1));
         cabDataService.reset();

@@ -31,6 +31,9 @@ public class Cab {
         this.destinationLoc = -1;
     }
 
+
+    //getter and setter methods for Cab class 
+
     public int getId() {
         return cabId;
     }

@@ -26,6 +26,9 @@ public class CabDataService {
     {
         ArrayList<Integer> cabIds = new ArrayList<>();
         try {
+
+            //Reading initial information from IDs.txt file
+
             File inputFile = new File("IDs.txt");
             Scanner in = new Scanner(inputFile);
 
@@ -48,11 +51,14 @@ public class CabDataService {
 
         for (int cabId : cabIds) {
             Cab cab = new Cab(cabId);
+
+            //Saving CAB information in database
             repo.save(cab);
         }
     }
 
     public ArrayList<Cab> getAllCabs() {
+        //Returns all cabs information
         ArrayList<Cab> cabs=new ArrayList<>();
         repo.findAll().forEach(cabs::add);
         return cabs;
@@ -60,7 +66,7 @@ public class CabDataService {
 
     public String getCabStatus(int cabId) {
         try {
-            //Cab cab=repo.findById(cabId).get();
+            //Get cab status of corresponding cab
             Cab cab=em.find(Cab.class, cabId, LockModeType.PESSIMISTIC_WRITE);
             String stateStr = cab.state.toString().toLowerCase().replaceAll("_", "-");
             if (cab.state.equals(CabState.GIVING_RIDE.toString())) {
@@ -82,7 +88,7 @@ public class CabDataService {
         for (Cab cab : cabs) {
             System.out.println("Sending ride end request for cab "+cab.cabId+" and ride "+cab.rideId);
 
-            // Send rideEnded request
+            // Send rideEnded request to Cab-Service
             String rideEndedURL = "http://cab-service:8080/rideEnded";
             RequestSender.getHTTPResponse(
                 rideEndedURL, 
@@ -93,7 +99,7 @@ public class CabDataService {
                 )
             );
 
-            // Send signOut request
+            // Send signOut request to Cab-Service
             String signOutURL = "http://cab-service:8080/signOut";
             RequestSender.getHTTPResponse(
                 signOutURL, 

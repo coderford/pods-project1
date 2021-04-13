@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class CustDataService {
 
-   // private ArrayList<Customer> customers = new ArrayList<>();
 
     @Autowired
     CustRepo repo;
@@ -58,15 +57,7 @@ public class CustDataService {
     }
 
     public void reset() {
-        init();
-        /*
-        ArrayList<Customer> customers=getAllCustomers();
-        for (Customer cust : customers) {
-            cust.sourceLoc = 0;
-            cust.rideId = 0;
-            cust.rideState = RideState.ENDED.toString();
-            repo.save(cust);
-        }
-        */
+        init(); //Call initialization function to reset database
+        
     }
 }

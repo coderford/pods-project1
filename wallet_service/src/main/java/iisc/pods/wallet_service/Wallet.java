@@ -23,6 +23,7 @@ public class Wallet {
     }
 
     public synchronized boolean addAmount(int amount) {
+      //Add amount to the wallet  
         if(amount > 0) {
             balance += amount;
             return true;
@@ -31,6 +32,7 @@ public class Wallet {
     }
 
     public synchronized boolean deductAmount(int amount) {
+        //if fare is less than balance then deduct amount from account
         if(amount > 0 && amount <= balance) {
             balance -= amount;
             return true;
